@@ -36,6 +36,7 @@ export type PlaceRow = {
   description: string | null;
   lat: number;
   lng: number;
+  address: Record<string, unknown>;
   operatingHours: Record<string, [string, string] | null>;
   expectedVisitMinutes: number | null;
   priceLowInr: number | null;
@@ -85,6 +86,7 @@ const PLACE_COLUMNS = sql`
   p.slug, p.name, p.category, p.description,
   ST_Y(p.location::geometry) AS lat,
   ST_X(p.location::geometry) AS lng,
+  p.address,
   p.operating_hours AS "operatingHours",
   p.expected_visit_minutes AS "expectedVisitMinutes",
   p.price_low_inr AS "priceLowInr",
