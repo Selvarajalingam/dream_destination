@@ -1,4 +1,4 @@
-import type { Sql } from 'postgres';
+import type { SeedSql } from './types';
 import type { SourceKey } from './sources';
 
 /**
@@ -45,7 +45,7 @@ export const HELP_FACILITIES: FacilitySeed[] = [
 ];
 
 export async function seedHelpFacilities(
-  tx: Sql,
+  tx: SeedSql,
   sourceIds: Record<SourceKey, string>,
 ): Promise<void> {
   for (const facility of HELP_FACILITIES) {

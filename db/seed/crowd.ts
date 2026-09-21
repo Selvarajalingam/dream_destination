@@ -1,4 +1,4 @@
-import type { Sql } from 'postgres';
+import type { SeedSql } from './types';
 import type { PlaceIds } from './places';
 import type { SourceKey } from './sources';
 import type { UserKey } from './users';
@@ -67,7 +67,7 @@ const clamp = (value: number, min: number, max: number): number =>
   Math.min(max, Math.max(min, value));
 
 export async function seedCrowd(
-  tx: Sql,
+  tx: SeedSql,
   placeIds: PlaceIds,
   sourceIds: Record<SourceKey, string>,
   userIds: Record<UserKey, string>,

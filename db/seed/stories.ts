@@ -1,4 +1,4 @@
-import type { Sql } from 'postgres';
+import type { SeedSql } from './types';
 import type { PlaceIds } from './places';
 import type { SourceKey } from './sources';
 
@@ -141,7 +141,7 @@ export const STORIES: StorySeed[] = [
 ];
 
 export async function seedStories(
-  tx: Sql,
+  tx: SeedSql,
   placeIds: PlaceIds,
   sourceIds: Record<SourceKey, string>,
 ): Promise<void> {

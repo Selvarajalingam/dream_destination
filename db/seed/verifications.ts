@@ -1,4 +1,4 @@
-import type { Sql } from 'postgres';
+import type { SeedSql } from './types';
 import type { PlaceIds } from './places';
 import { PLACES } from './places';
 import type { UserKey } from './users';
@@ -246,7 +246,7 @@ const UNDER_REVIEW = ['koolangal-river-walk'];
 const EXPIRED = ['vaidehi-falls'];
 
 export async function seedVerifications(
-  tx: Sql,
+  tx: SeedSql,
   placeIds: PlaceIds,
   userIds: Record<UserKey, string>,
 ): Promise<void> {

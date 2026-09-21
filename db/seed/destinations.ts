@@ -1,4 +1,4 @@
-import type { Sql } from 'postgres';
+import type { SeedSql } from './types';
 
 /**
  * Pilot geography: Coimbatore district and The Nilgiris, Tamil Nadu. Chosen
@@ -108,7 +108,7 @@ export const TRAVEL_MINUTES_FROM_ORIGIN: Record<DestinationKey, number> = {
   coimbatore: 20,
 };
 
-export async function seedDestinations(tx: Sql): Promise<Record<DestinationKey, string>> {
+export async function seedDestinations(tx: SeedSql): Promise<Record<DestinationKey, string>> {
   const ids = {} as Record<DestinationKey, string>;
 
   for (const destination of DESTINATIONS) {

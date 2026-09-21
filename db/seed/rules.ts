@@ -1,4 +1,4 @@
-import type { Sql } from 'postgres';
+import type { SeedSql } from './types';
 import type { DestinationKey } from './destinations';
 import type { PlaceIds } from './places';
 import type { SourceKey } from './sources';
@@ -194,7 +194,7 @@ export const RULES: RuleSeed[] = [
 ];
 
 export async function seedRules(
-  tx: Sql,
+  tx: SeedSql,
   placeIds: PlaceIds,
   destinationIds: Record<DestinationKey, string>,
   sourceIds: Record<SourceKey, string>,

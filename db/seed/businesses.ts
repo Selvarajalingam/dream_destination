@@ -1,4 +1,4 @@
-import type { Sql } from 'postgres';
+import type { SeedSql } from './types';
 import type { UserKey } from './users';
 
 /**
@@ -91,7 +91,7 @@ export const BUSINESSES: BusinessSeed[] = [
 export type BusinessIds = Record<string, string>;
 
 export async function seedBusinesses(
-  tx: Sql,
+  tx: SeedSql,
   userIds: Record<UserKey, string>,
 ): Promise<BusinessIds> {
   const ids: BusinessIds = {};

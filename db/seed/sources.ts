@@ -1,4 +1,4 @@
-import type { Sql } from 'postgres';
+import type { SeedSql } from './types';
 
 /**
  * Every seeded source carries source_type = 'seeded_demo'. PRD Part II §17
@@ -138,7 +138,7 @@ const SOURCES: SourceSeed[] = [
   },
 ];
 
-export async function seedSources(tx: Sql): Promise<Record<SourceKey, string>> {
+export async function seedSources(tx: SeedSql): Promise<Record<SourceKey, string>> {
   const ids = {} as Record<SourceKey, string>;
 
   for (const source of SOURCES) {

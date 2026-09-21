@@ -1,5 +1,6 @@
 import process from 'node:process';
 import postgres, { type Sql } from 'postgres';
+import type { SeedSql } from './types';
 import { seedBusinesses } from './businesses';
 import { seedCrowd } from './crowd';
 import { seedDestinations } from './destinations';
@@ -61,27 +62,29 @@ const TABLES_TO_CLEAR = [
   'source_records',
 ];
 
-async function clear(tx: Sql): Promise<void> {
+async function clear(tx: SeedSql): Promise<void> {
   for (const table of TABLES_TO_CLEAR) {
     await tx.unsafe(`DELETE FROM ${table}`);
   }
 }
 
 export async function seed(sql: Sql): Promise<void> {
-  await sql.begin(async (tx) => {
-    await clear(tx as Sql);
+  await sql.begin(async (transaction) => {
+    const tx = transaction as unknown as SeedSql;
 
-    const sourceIds = await seedSources(tx as Sql);
-    const userIds = await seedUsers(tx as Sql);
-    const destinationIds = await seedDestinations(tx as Sql);
-    const placeIds = await seedPlaces(tx as Sql, destinationIds, sourceIds);
+    await clear(tx);
 
-    await seedVerifications(tx as Sql, placeIds, userIds);
-    await seedBusinesses(tx as Sql, userIds);
-    await seedHelpFacilities(tx as Sql, sourceIds);
-    await seedRules(tx as Sql, placeIds, destinationIds, sourceIds);
-    await seedStories(tx as Sql, placeIds, sourceIds);
-    await seedCrowd(tx as Sql, placeIds, sourceIds, userIds);
+    const sourceIds = await seedSources(tx);
+    const userIds = await seedUsers(tx);
+    const destinationIds = await seedDestinations(tx);
+    const placeIds = await seedPlaces(tx, destinationIds, sourceIds);
+
+    await seedVerifications(tx, placeIds, userIds);
+    await seedBusinesses(tx, userIds);
+    await seedHelpFacilities(tx, sourceIds);
+    await seedRules(tx, placeIds, destinationIds, sourceIds);
+    await seedStories(tx, placeIds, sourceIds);
+    await seedCrowd(tx, placeIds, sourceIds, userIds);
   });
 }
 

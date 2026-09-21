@@ -1,4 +1,4 @@
-import type { Sql } from 'postgres';
+import type { SeedSql } from './types';
 
 /**
  * Demonstration accounts. No passwords are stored: the pilot authentication
@@ -38,7 +38,7 @@ const USERS: UserSeed[] = [
   },
 ];
 
-export async function seedUsers(tx: Sql): Promise<Record<UserKey, string>> {
+export async function seedUsers(tx: SeedSql): Promise<Record<UserKey, string>> {
   const ids = {} as Record<UserKey, string>;
 
   for (const user of USERS) {
