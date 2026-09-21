@@ -1,16 +1,17 @@
 services:
   postgres:
-    image: postgis/postgis:16-3.4
+    build:
+      context: ./db/docker
+    image: dream-destination/postgis-pgvector:16-3.4
     container_name: dream_postgres
     environment:
       POSTGRES_USER: dream
       POSTGRES_PASSWORD: dream
       POSTGRES_DB: dream_destination
     ports:
-      - '5432:5432'
+      - '5433:5432'
     volumes:
       - dream_pgdata:/var/lib/postgresql/data
-      - ./db/docker-init:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U dream -d dream_destination']
       interval: 5s
@@ -21,7 +22,7 @@ services:
     image: redis:7-alpine
     container_name: dream_redis
     ports:
-      - '6379:6379'
+      - '6380:6379'
     healthcheck:
       test: ['CMD', 'redis-cli', 'ping']
       interval: 5s
