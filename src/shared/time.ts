@@ -17,14 +17,22 @@ export function isExpired(expiresAt: Date | null, now: Date): boolean {
   return expiresAt !== null && expiresAt.getTime() <= now.getTime();
 }
 
-/** "12 Sep 2026" — the source-freshness format from PRD Part I §5.7. */
+/**
+ * "12 Sep 2026" — the source-freshness format from PRD Part I §5.7.
+ *
+ * en-GB renders September as "Sept", which is four letters where every other
+ * month is three. The PRD's example uses "Sep", so it is normalised here to
+ * keep the pattern even across all twelve months.
+ */
 export function formatSourceDate(date: Date): string {
   return new Intl.DateTimeFormat('en-GB', {
     day: '2-digit',
     month: 'short',
     year: 'numeric',
     timeZone: PILOT_TIMEZONE,
-  }).format(date);
+  })
+    .format(date)
+    .replace('Sept', 'Sep');
 }
 
 /** "09:00" in pilot-local time. */
