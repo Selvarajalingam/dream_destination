@@ -11,6 +11,10 @@ export const metadata: Metadata = {
   applicationName: 'Dream Destination',
   manifest: '/manifest.webmanifest',
   appleWebApp: { capable: true, title: 'Dream Destination', statusBarStyle: 'default' },
+  icons: {
+    icon: [{ url: '/favicon.svg', type: 'image/svg+xml' }],
+    apple: [{ url: '/icons/icon.svg' }],
+  },
   formatDetection: { telephone: true },
 };
 

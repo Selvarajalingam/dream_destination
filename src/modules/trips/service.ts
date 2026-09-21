@@ -7,6 +7,7 @@ import type { BudgetLine, BudgetSummary, PriceState } from '@/modules/budgets/do
 import type { TripBrief } from '@/platform/ai/schemas';
 import { DomainError } from '@/shared/result';
 import { PILOT_TIMEZONE, addMinutes } from '@/shared/time';
+import { haversineMeters } from '@/shared/geo';
 import { detectConflicts } from './domain/conflicts';
 import { recalculateSchedule } from './domain/itinerary';
 import { assertTransition } from './domain/trip-state';
@@ -51,6 +52,13 @@ const MEAL_CATEGORIES = new Set(['restaurant', 'cafe', 'farm']);
 /** How far beyond a destination to look for additional candidate places. */
 const NEARBY_CANDIDATE_RADIUS_M = 60_000;
 
+/**
+ * Distance from the destination centre a place can sit at without being
+ * penalised. Beyond this, a stop starts costing the day more in travel than
+ * it returns in interest.
+ */
+const COMFORTABLE_DAY_TRIP_KM = 25;
+
 export type TripDetail = {
   trip: TripRow;
   days: ItineraryDay[];
@@ -84,7 +92,11 @@ function priceOf(place: PlaceRow): { lowMinor: number; expectedMinor: number; hi
  * hidden gems get a small lift because surfacing them is a product goal, and
  * places that conflict with a declared accessibility need are pushed down.
  */
-function rankPlaces(places: PlaceRow[], brief: TripBrief): PlaceRow[] {
+function rankPlaces(
+  places: PlaceRow[],
+  brief: TripBrief,
+  center: { lat: number; lng: number } | null,
+): PlaceRow[] {
   const interests = new Set(brief.interests ?? []);
   const needsStepFree = brief.constraints?.lowWalking === true;
 
@@ -122,6 +134,15 @@ function rankPlaces(places: PlaceRow[], brief: TripBrief): PlaceRow[] {
 
     // A shorter visit fits more easily into a day.
     score -= (place.expectedVisitMinutes ?? 60) / 30;
+
+    // Distance from the chosen destination. Without this, a high-scoring place
+    // an hour outside the area can be ranked above a good local one, and the
+    // day ends up sprawling across districts. Places near the destination are
+    // unaffected; the penalty grows steeply past a comfortable day-trip range.
+    if (center !== null) {
+      const km = haversineMeters(center, { lat: place.lat, lng: place.lng }) / 1000;
+      score -= Math.max(0, km - COMFORTABLE_DAY_TRIP_KM) * 1.5;
+    }
 
     return score;
   }
@@ -262,7 +283,11 @@ export const tripsService = {
       if (!candidates.some((existing) => existing.id === place.id)) candidates.push(place);
     }
 
-    const ranked = rankPlaces(candidates, brief);
+    const ranked = rankPlaces(
+      candidates,
+      brief,
+      destination === null ? null : { lat: destination.lat, lng: destination.lng },
+    );
 
     // Only places that serve food belong in a meal slot. A cab company or a
     // birding guide is a useful listing, but not lunch.

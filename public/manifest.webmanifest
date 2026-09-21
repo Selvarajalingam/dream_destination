@@ -1,0 +1,40 @@
+{
+  "name": "Dream Destination",
+  "short_name": "Dream",
+  "description": "Describe a trip, compare suitable destinations, build an itinerary within budget, and carry the essential plan offline.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FFFFFF",
+  "theme_color": "#17324D",
+  "lang": "en-IN",
+  "dir": "ltr",
+  "categories": ["travel", "navigation"],
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-maskable.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Plan a trip",
+      "short_name": "Plan",
+      "url": "/dream-ai"
+    },
+    {
+      "name": "Nearby help",
+      "short_name": "Help",
+      "url": "/help"
+    }
+  ]
+}

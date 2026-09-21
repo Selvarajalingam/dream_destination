@@ -105,13 +105,17 @@ export function BudgetMeter({ budget, compact = false }: { budget: BudgetView; c
 }
 
 /** The four price provenance states, labelled distinctly (T08). */
+const PRICE_STATE_COPY = {
+  live: { text: 'Checked just now', tone: 'text-status-good' },
+  partner: { text: 'From a provider', tone: 'text-text-secondary' },
+  historical: { text: 'Typical price', tone: 'text-text-secondary' },
+  manual: { text: 'You entered this', tone: 'text-text-secondary' },
+} as const;
+
 export function PriceStateLabel({ state }: { state: 'live' | 'partner' | 'historical' | 'manual' }) {
-  const copy = {
-    live: { text: 'Checked just now', tone: 'text-status-good' },
-    partner: { text: 'From a provider', tone: 'text-text-secondary' },
-    historical: { text: 'Typical price', tone: 'text-text-secondary' },
-    manual: { text: 'You entered this', tone: 'text-text-secondary' },
-  }[state];
+  // An unrecognised state falls back to the most cautious label rather than
+  // crashing: a missing provenance is closer to "typical" than to "checked".
+  const copy = PRICE_STATE_COPY[state] ?? PRICE_STATE_COPY.historical;
 
   return (
     <span data-testid="price-state" className={clsx('text-[13px] font-[650]', copy.tone)}>
