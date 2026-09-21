@@ -222,6 +222,26 @@ export default async function PlacePage({ params }: { params: Promise<{ slug: st
         </p>
       </section>
 
+      <section className="mt-6">
+        <h2 className="text-[21px]">Getting there</h2>
+        <p className="mt-1 text-[14px] text-text-secondary">
+          {place.lat.toFixed(5)}, {place.lng.toFixed(5)}
+        </p>
+        <a
+          href={`https://www.openstreetmap.org/?mlat=${place.lat}&mlon=${place.lng}#map=16/${place.lat}/${place.lng}`}
+          target="_blank"
+          rel="noreferrer noopener"
+          data-touch-target
+          className="mt-2 inline-flex min-h-[44px] items-center rounded-xl border border-border-subtle px-4 text-[14px] font-[650]"
+        >
+          Open in maps
+        </a>
+        <p className="mt-2 text-[14px] text-text-secondary">
+          Coordinates work even when routing is unavailable, so this link never depends on a
+          provider being reachable.
+        </p>
+      </section>
+
       {/* The visit action sits after the limitations, never before them. */}
       <div className="sticky bottom-[80px] mt-6 rounded-[16px] border border-border-subtle bg-surface-base p-3 elevation-2">
         <Button className="w-full">Add to trip</Button>
