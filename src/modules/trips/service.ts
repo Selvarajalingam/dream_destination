@@ -45,6 +45,12 @@ const DAY_BUDGET_MINUTES: Record<string, number> = {
 const MEAL_SLOT_MINUTES = 240;
 const MEAL_DURATION_MINUTES = 60;
 
+/** Business categories that can fill a meal slot. */
+const MEAL_CATEGORIES = new Set(['restaurant', 'cafe', 'farm']);
+
+/** How far beyond a destination to look for additional candidate places. */
+const NEARBY_CANDIDATE_RADIUS_M = 60_000;
+
 export type TripDetail = {
   trip: TripRow;
   days: ItineraryDay[];
@@ -212,6 +218,7 @@ export const tripsService = {
       },
       budget: {
         expectedTotalMinor: budget?.expectedTotalMinor ?? 0,
+        totalLimitMinor: budget?.totalLimitMinor ?? Number.MAX_SAFE_INTEGER,
         spendableMinor:
           budget === null ? Number.MAX_SAFE_INTEGER : budget.totalLimitMinor - budget.reserveMinor,
       },
@@ -236,10 +243,32 @@ export const tripsService = {
     const pace = brief.pace ?? 'balanced';
     const dayBudget = DAY_BUDGET_MINUTES[pace] ?? DAY_BUDGET_MINUTES.balanced;
 
-    const allPlaces = await catalogRepository.listPlacesForDestination(trip.destinationId);
-    const ranked = rankPlaces(allPlaces, brief);
+    // Candidates are the destination's own places plus anything else in the
+    // catalog within reach of it, so a longer trip does not run out of stops
+    // on its final day.
+    const destination = await catalogRepository.findDestinationById(trip.destinationId);
+    const ownPlaces = await catalogRepository.listPlacesForDestination(trip.destinationId);
+    const nearbyPlaces =
+      destination === null
+        ? []
+        : await catalogRepository.findPlacesNear(
+            { lat: destination.lat, lng: destination.lng },
+            NEARBY_CANDIDATE_RADIUS_M,
+            40,
+          );
 
-    const businesses = await businessRepository.findForDestination(trip.destinationId, 20);
+    const candidates = [...ownPlaces];
+    for (const place of nearbyPlaces) {
+      if (!candidates.some((existing) => existing.id === place.id)) candidates.push(place);
+    }
+
+    const ranked = rankPlaces(candidates, brief);
+
+    // Only places that serve food belong in a meal slot. A cab company or a
+    // birding guide is a useful listing, but not lunch.
+    const allBusinesses = await businessRepository.findForDestination(trip.destinationId, 30);
+    const businesses = allBusinesses.filter((business) => MEAL_CATEGORIES.has(business.category));
+
     const maps = getMapsProvider();
 
     const startDate = trip.startDate ?? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
@@ -425,7 +454,7 @@ export const tripsService = {
     // A reserve of 10% is held back by default, which the traveler can change.
     const reserveMinor = Math.round(totalLimitMinor * 0.1);
 
-    await tripsRepository.replaceBudget(tripId, totalLimitMinor, reserveMinor, lines);
+    await tripsRepository.replaceBudget(tripId, totalLimitMinor, reserveMinor, fitToBudget(lines, totalLimitMinor - reserveMinor));
   },
 
   /** Recomputes start times after a reorder, honouring locked items. */
@@ -474,6 +503,58 @@ export const tripsService = {
     await tripsRepository.setStatus(tripId, next);
   },
 };
+
+type DraftLine = {
+  category: string;
+  description: string;
+  lowMinor: number | null;
+  expectedMinor: number;
+  highMinor: number | null;
+  priceState: PriceState;
+  itineraryItemId?: string | null;
+};
+
+/**
+ * Brings a plan back toward the declared budget before showing it.
+ *
+ * PRD Part I T03: "If the request conflicts with the budget, show a usable
+ * reduced plan or alternative destination." So rather than presenting an
+ * overrun and leaving it there, discretionary spend is scaled toward a
+ * lower-cost version of the same trip. Stay and transport are left alone
+ * because they are not genuinely optional, and if the trip still does not fit,
+ * the honest overrun is reported rather than hidden.
+ */
+function fitToBudget(lines: DraftLine[], spendableMinor: number): DraftLine[] {
+  const total = lines.reduce((sum, line) => sum + line.expectedMinor, 0);
+  if (total <= spendableMinor) return lines;
+
+  const essentialTotal = lines
+    .filter((line) => !DISCRETIONARY_CATEGORIES.has(line.category))
+    .reduce((sum, line) => sum + line.expectedMinor, 0);
+
+  const discretionaryTotal = total - essentialTotal;
+  const roomForDiscretionary = spendableMinor - essentialTotal;
+
+  // Essentials alone already break the budget: nothing to trim, so report it.
+  if (roomForDiscretionary <= 0 || discretionaryTotal <= 0) return lines;
+
+  // Never cut discretionary spend below 60% of the planned experience, or the
+  // "reduced plan" stops resembling the trip the traveller asked for.
+  const factor = Math.max(0.6, roomForDiscretionary / discretionaryTotal);
+  if (factor >= 1) return lines;
+
+  return lines.map((line) => {
+    if (!DISCRETIONARY_CATEGORIES.has(line.category)) return line;
+    return {
+      ...line,
+      lowMinor: line.lowMinor === null ? null : Math.round(line.lowMinor * factor),
+      expectedMinor: Math.round(line.expectedMinor * factor),
+      highMinor: line.highMinor === null ? null : Math.round(line.highMinor * factor),
+    };
+  });
+}
+
+const DISCRETIONARY_CATEGORIES = new Set(['food', 'activities', 'shopping']);
 
 /** Whether a place is open for the whole visit at this instant. */
 function isOpenAt(place: PlaceRow, at: Date): boolean {

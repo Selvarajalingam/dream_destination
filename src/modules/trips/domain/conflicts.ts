@@ -74,11 +74,18 @@ export function detectConflicts(day: ItineraryDay, context: ConflictContext): Co
   }
 
   if (context.budget.expectedTotalMinor > context.budget.spendableMinor) {
+    // spendableMinor is the budget less the reserve, so this fires before the
+    // budget itself is breached. The wording says which of the two it is, so
+    // the warning matches what the budget meter shows.
+    const overBudget = context.budget.expectedTotalMinor > context.budget.totalLimitMinor;
+
     conflicts.push({
       kind: 'budget_overrun',
-      severity: 'warning',
-      message: 'The planned spend for this trip is above the budget you set.',
-      suggestedAction: 'Open the budget planner to lower a category or raise the total.',
+      severity: overBudget ? 'blocking' : 'warning',
+      message: overBudget
+        ? 'The planned spend for this trip is above the budget you set.'
+        : 'This plan uses part of the reserve you set aside.',
+      suggestedAction: 'Open the budget planner to lower a category, or adjust the reserve.',
       itemId: null,
     });
   }

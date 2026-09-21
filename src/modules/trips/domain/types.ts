@@ -79,6 +79,9 @@ export type ConflictContext = {
   };
   budget: {
     expectedTotalMinor: number;
+    /** The declared budget. */
+    totalLimitMinor: number;
+    /** The declared budget less any reserve held back. */
     spendableMinor: number;
   };
 };

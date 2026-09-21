@@ -85,12 +85,29 @@ describe('crowdService.getStatusForPlaces', () => {
 describe('crowdService.findQuieterTime', () => {
   it('suggests the quietest upcoming hour from the forecast', async () => {
     const placeId = await placeIdFor('ooty-lake');
+
+    // Forecasts are seeded hourly between 06:00 and 19:00 local, so ask from
+    // the small hours of tomorrow rather than from "this time tomorrow",
+    // which could fall after the last slot of the day.
     const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000);
-    const quieter = await crowdService.findQuieterTime(placeId, tomorrow, tomorrow);
+    const beforeDawn = new Date(tomorrow);
+    beforeDawn.setHours(1, 0, 0, 0);
+
+    const quieter = await crowdService.findQuieterTime(placeId, tomorrow, beforeDawn);
 
     expect(quieter).not.toBeNull();
-    expect(quieter!.startsAt.getTime()).toBeGreaterThan(tomorrow.getTime());
+    expect(quieter!.startsAt.getTime()).toBeGreaterThan(beforeDawn.getTime());
     expect(quieter!.band).not.toBe('unknown');
+  });
+
+  it('prefers a comfortable slot over a busy one', async () => {
+    const placeId = await placeIdFor('ooty-lake');
+    const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    const beforeDawn = new Date(tomorrow);
+    beforeDawn.setHours(1, 0, 0, 0);
+
+    const quieter = await crowdService.findQuieterTime(placeId, tomorrow, beforeDawn);
+    expect(['comfortable', 'moderate']).toContain(quieter!.band);
   });
 
   it('returns null when there is no forecast for that place', async () => {

@@ -30,12 +30,16 @@ const STYLE_FACTOR: Record<BudgetStyle, number> = {
 function resolveState(
   expectedTotalMinor: number,
   highTotalMinor: number,
-  spendableMinor: number,
+  totalLimitMinor: number,
   missingPriceLines: string[],
 ): BudgetState {
-  if (expectedTotalMinor > spendableMinor) return 'over_budget';
+  // The state is judged against the declared budget, not against the budget
+  // minus the reserve. A plan that costs less than the traveller's total is
+  // not "over budget" merely because it eats into a reserve they chose to
+  // hold back; the meter shows that separately through remainingMinor.
+  if (expectedTotalMinor > totalLimitMinor) return 'over_budget';
   if (missingPriceLines.length > 0) return 'missing_price_data';
-  if (highTotalMinor > spendableMinor) return 'high_estimate_over';
+  if (highTotalMinor > totalLimitMinor) return 'high_estimate_over';
   return 'within_budget';
 }
 
@@ -68,7 +72,7 @@ export function summarizeBudget(
     lowTotalMinor,
     highTotalMinor,
     remainingMinor: spendableMinor - expectedTotalMinor,
-    state: resolveState(expectedTotalMinor, highTotalMinor, spendableMinor, missingPriceLines),
+    state: resolveState(expectedTotalMinor, highTotalMinor, totalLimitMinor, missingPriceLines),
     byCategory,
     estimatedItemCount: lines.length - livePricedItemCount,
     livePricedItemCount,

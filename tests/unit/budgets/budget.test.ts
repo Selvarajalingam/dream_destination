@@ -49,8 +49,18 @@ describe('summarizeBudget', () => {
     expect(summary.state).toBe('over_budget');
   });
 
-  it('counts the reserve against the limit when deciding the state', () => {
+  it('does not call a plan over budget merely because it eats into the reserve', () => {
+    // The plan costs less than the declared budget, but more than the budget
+    // minus the reserve. A traveller reads that as "within budget, reserve
+    // partly used", so the state stays within_budget and the shortfall shows
+    // through a negative remaining balance instead.
     const summary = summarizeBudget([line({ expectedMinor: 900_000, highMinor: 900_000 })], 1_000_000, 300_000);
+    expect(summary.state).toBe('within_budget');
+    expect(summary.remainingMinor).toBe(-200_000);
+  });
+
+  it('still reports over_budget when the plan exceeds the declared budget', () => {
+    const summary = summarizeBudget([line({ expectedMinor: 1_200_000, highMinor: 1_200_000 })], 1_000_000, 300_000);
     expect(summary.state).toBe('over_budget');
   });
 

@@ -41,7 +41,7 @@ const baseContext = (over: Partial<ConflictContext> = {}): ConflictContext => ({
   },
   crowdByPlaceId: {},
   constraints: {},
-  budget: { expectedTotalMinor: 100_000, spendableMinor: 2_500_000 },
+  budget: { expectedTotalMinor: 100_000, totalLimitMinor: 2_500_000, spendableMinor: 2_250_000 },
   ...over,
 });
 
@@ -92,7 +92,7 @@ describe('detectConflicts', () => {
   it('flags a budget overrun against the spendable limit', () => {
     const conflicts = detectConflicts(
       day([item('a')]),
-      baseContext({ budget: { expectedTotalMinor: 3_000_000, spendableMinor: 2_500_000 } }),
+      baseContext({ budget: { expectedTotalMinor: 3_000_000, totalLimitMinor: 2_500_000, spendableMinor: 2_250_000 } }),
     );
     expect(conflicts.map((c) => c.kind)).toContain('budget_overrun');
   });
