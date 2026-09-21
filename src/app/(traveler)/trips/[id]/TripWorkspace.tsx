@@ -153,6 +153,21 @@ export function TripWorkspace({
     setError(null);
     setUndoStack((stack) => [...stack.slice(-4), state]);
 
+    // A toggle that does not move until a round trip completes reads as
+    // broken. The lock is reflected immediately and reconciled from the
+    // response; a failure restores the previous state below.
+    if (body.action === 'lock') {
+      setState((current) => ({
+        ...current,
+        days: current.days.map((day) => ({
+          ...day,
+          items: day.items.map((item) =>
+            item.id === body.itemId ? { ...item, lockedByUser: body.locked === true } : item,
+          ),
+        })),
+      }));
+    }
+
     try {
       const result = await api.patch<TripState>(`/api/v1/trips/${state.trip.id}/itinerary`, {
         ...body,
@@ -161,6 +176,8 @@ export function TripWorkspace({
       applyResult(result);
     } catch (caught) {
       setError(describeError(caught));
+      // Roll back to exactly what was on screen before this attempt.
+      setState(state);
       setUndoStack((stack) => stack.slice(0, -1));
     } finally {
       setBusy(null);

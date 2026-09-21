@@ -137,6 +137,15 @@
   .elevation-3 { box-shadow: 0 16px 40px rgb(23 32 42 / 0.16); }
 }
 
+/*
+ * Trip Mode replaces the standard bottom navigation with Next / Map / Alerts
+ * / Help (PRD Part I §3.2). Hiding it here keeps the traveller layout in one
+ * place rather than duplicating the shell for one screen.
+ */
+body:has([data-trip-mode='active']) nav[aria-label='Main'] {
+  display: none;
+}
+
 /* PRD Part I §4.5 and §11: respect reduced motion. */
 @media (prefers-reduced-motion: reduce) {
   *,

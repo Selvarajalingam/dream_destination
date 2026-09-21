@@ -24,6 +24,14 @@ const PACK_PREFIX = 'dd-pack-';
 /** Header carrying the moment a response was cached. */
 const CACHED_AT = 'x-dd-cached-at';
 
+/**
+ * Next.js sets `Vary: rsc, next-router-state-tree, ...` on HTML responses, so
+ * a cached page never matches a later navigation whose router headers differ.
+ * Every lookup here ignores Vary, matching on the URL, which is what we
+ * actually key these caches by.
+ */
+const MATCH = { ignoreVary: true };
+
 /** Routes that must always work with no signal. */
 const SHELL_ROUTES = ['/', '/help', '/trips', '/offline'];
 
@@ -31,14 +39,32 @@ const SHELL_ROUTES = ['/', '/help', '/trips', '/offline'];
 const NETWORK_TIMEOUT_MS = 2500;
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches
-      .open(SHELL_CACHE)
-      .then((cache) => cache.addAll(SHELL_ROUTES.map((route) => new Request(route, { cache: 'reload' }))))
-      .catch(() => undefined)
-      .then(() => self.skipWaiting()),
-  );
+  event.waitUntil(precacheShell().then(() => self.skipWaiting()));
 });
+
+/**
+ * Precaches each shell route independently.
+ *
+ * cache.addAll is atomic: one route returning 404 discards the whole batch and
+ * leaves nothing cached, which is the worst possible failure for an offline
+ * feature because it fails silently. Caching one at a time means a missing
+ * route costs only that route.
+ */
+async function precacheShell() {
+  const cache = await caches.open(SHELL_CACHE);
+
+  await Promise.all(
+    SHELL_ROUTES.map(async (route) => {
+      try {
+        const response = await fetch(new Request(route, { cache: 'reload' }));
+        if (response.ok) await cache.put(route, stamp(response));
+      } catch {
+        // A route that cannot be precached still works online; it simply will
+        // not be available offline until it has been visited once.
+      }
+    }),
+  );
+}
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
@@ -60,8 +86,15 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-/** Paths whose freshness matters, so they are fetched network-first. */
-const FRESHNESS_SENSITIVE = ['/crowd', '/rules', '/help', '/weather', '/prices'];
+/**
+ * API paths whose freshness matters, fetched network-first.
+ *
+ * Scoped to /api/ deliberately: the Nearby Help *page* is a navigation that
+ * must survive offline from the shell cache, while the help *endpoint* should
+ * prefer a fresh answer. Matching on the bare word would have sent the page
+ * down the API path and looked for it in the wrong cache.
+ */
+const FRESHNESS_SENSITIVE = ['/api/v1/places/', '/api/v1/trips/', '/api/v1/weather'];
 
 /** Paths that must never be served from cache. */
 const NETWORK_ONLY = ['/api/v1/trips', '/api/v1/trip-briefs', '/api/v1/admin', '/api/v1/recommendations'];
@@ -80,7 +113,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  if (FRESHNESS_SENSITIVE.some((path) => url.pathname.includes(path))) {
+  if (FRESHNESS_SENSITIVE.some((path) => url.pathname.startsWith(path))) {
     event.respondWith(networkFirst(request));
     return;
   }
@@ -103,7 +136,7 @@ function isPackResource(url) {
 }
 
 async function cacheFirst(request, cacheName) {
-  const cached = await caches.match(request);
+  const cached = await caches.match(request, MATCH);
   if (cached !== undefined) return cached;
 
   const response = await fetch(request);
@@ -116,7 +149,7 @@ async function cacheFirst(request, cacheName) {
 
 async function staleWhileRevalidate(request) {
   const cache = await caches.open(CONTENT_CACHE);
-  const cached = await cache.match(request);
+  const cached = await cache.match(request, MATCH);
 
   const network = fetch(request)
     .then((response) => {
@@ -143,8 +176,9 @@ async function networkFirst(request) {
     return response;
   } catch {
     // Fall back to whatever was stored, with its age attached so the UI can
-    // label it rather than presenting it as current.
-    const cached = await cache.match(request);
+    // label it rather than presenting it as current. The lookup spans every
+    // cache, because a trip pack resource lives in its own pack cache.
+    const cached = (await cache.match(request, MATCH)) ?? (await caches.match(request, MATCH));
     if (cached !== undefined) return markStale(cached);
     return offlineFallback(request);
   }
@@ -159,10 +193,10 @@ async function navigationStrategy(request) {
     }
     return response;
   } catch {
-    const cached = await caches.match(request);
+    const cached = await caches.match(request, MATCH);
     if (cached !== undefined) return cached;
 
-    const shell = await caches.match('/offline');
+    const shell = await caches.match('/offline', MATCH);
     return shell ?? offlineFallback(request);
   }
 }

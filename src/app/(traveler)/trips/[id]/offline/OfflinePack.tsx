@@ -76,7 +76,8 @@ export function OfflinePack({
       return;
     }
 
-    void navigator.serviceWorker.register('/sw.js').catch(() => setSupported(false));
+    // Registration itself happens in the root layout; this screen only needs
+    // to know whether a worker is available to talk to.
 
     const onMessage = (event: MessageEvent): void => {
       const data = event.data as

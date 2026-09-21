@@ -99,7 +99,10 @@ export function TripMode({
   );
 
   return (
-    <div>
+    // PRD Part I §3.2: Trip Mode replaces the standard bottom navigation
+    // rather than sitting on top of it. globals.css hides the main nav while
+    // this attribute is present anywhere on the page.
+    <div data-trip-mode="active">
       {!online && <OfflineBanner lastSyncedAt={now} />}
 
       <header className="mt-2 flex flex-wrap items-center justify-between gap-2">
