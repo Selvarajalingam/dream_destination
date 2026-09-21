@@ -62,9 +62,9 @@ export function ErrorState({
   return (
     <div
       role="alert"
-      className="rounded-[16px] border border-status-danger/30 bg-status-danger/5 p-5"
+      className="rounded-[16px] border border-status-danger/30 bg-status-danger-surface p-5"
     >
-      <h2 className="text-[18px] font-[650] text-status-danger">{title}</h2>
+      <h2 className="text-[18px] font-[650] text-status-danger-text">{title}</h2>
       <p className="mt-2 text-[16px]">{whatFailed}</p>
       <p className="mt-2 text-[14px] text-text-secondary">{stillAvailable}</p>
       {action !== undefined && <div className="mt-4">{action}</div>}
@@ -83,7 +83,7 @@ export function StaleNote({ savedAt, className }: { savedAt: Date; className?: s
   return (
     <p
       data-testid="stale-note"
-      className={clsx('text-[14px] font-[650] text-status-warn', className)}
+      className={clsx('text-[14px] font-[650] text-status-warn-text', className)}
     >
       Viewing saved information from {time}
     </p>
@@ -120,9 +120,9 @@ export function OfflineBanner({ lastSyncedAt }: { lastSyncedAt: Date | null }) {
     <div
       role="status"
       data-testid="offline-banner"
-      className="flex flex-wrap items-center gap-x-2 gap-y-1 border-b border-status-warn/30 bg-status-warn/10 px-4 py-2 text-[14px]"
+      className="flex flex-wrap items-center gap-x-2 gap-y-1 border-b border-status-warn/30 bg-status-warn-surface px-4 py-2 text-[14px]"
     >
-      <span className="font-[650] text-status-warn">You are offline</span>
+      <span className="font-[650] text-status-warn-text">You are offline</span>
       <span className="text-text-secondary">
         Showing your saved trip.
         {lastSyncedAt !== null && ` Last synced ${new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kolkata' }).format(lastSyncedAt)}.`}

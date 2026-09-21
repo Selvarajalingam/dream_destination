@@ -25,10 +25,10 @@ export type CrowdStatusView = {
 };
 
 const TONE: Record<CrowdStatusView['band'], { text: string; bg: string; border: string }> = {
-  comfortable: { text: 'text-status-good', bg: 'bg-status-good/10', border: 'border-status-good/30' },
-  moderate: { text: 'text-status-warn', bg: 'bg-status-warn/10', border: 'border-status-warn/30' },
-  heavy: { text: 'text-status-danger', bg: 'bg-status-danger/10', border: 'border-status-danger/30' },
-  unknown: { text: 'text-status-unknown', bg: 'bg-status-unknown/10', border: 'border-status-unknown/30' },
+  comfortable: { text: 'text-status-good-text', bg: 'bg-status-good-surface', border: 'border-status-good/30' },
+  moderate: { text: 'text-status-warn-text', bg: 'bg-status-warn-surface', border: 'border-status-warn/30' },
+  heavy: { text: 'text-status-danger-text', bg: 'bg-status-danger-surface', border: 'border-status-danger/30' },
+  unknown: { text: 'text-status-unknown-text', bg: 'bg-status-unknown-surface', border: 'border-status-unknown/30' },
 };
 
 /** Icons carry an accessible name, so the state survives without colour. */
@@ -115,7 +115,7 @@ export function CrowdStatusBadge({
             )}
             <span className="text-[14px] text-text-secondary">· {status.confidenceLabel}</span>
             {status.isStale && (
-              <span className="text-[14px] font-[650] text-status-warn">· May be out of date</span>
+              <span className="text-[14px] font-[650] text-status-warn-text">· May be out of date</span>
             )}
           </>
         )}

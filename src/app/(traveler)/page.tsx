@@ -79,7 +79,7 @@ export default async function HomePage() {
           >
             <p className="text-[16px] font-[650]">{place.name}</p>
             <p className="mt-1 line-clamp-2 text-[14px] text-text-secondary">{place.description}</p>
-            <span className="mt-2 inline-block text-[13px] font-[650] text-status-good">
+            <span className="mt-2 inline-block text-[13px] font-[650] text-status-good-text">
               Dream Verified
             </span>
           </Link>

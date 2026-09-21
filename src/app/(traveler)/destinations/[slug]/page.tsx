@@ -138,12 +138,12 @@ export default async function DestinationPage({ params }: { params: Promise<{ sl
                 >
                   <div className="flex flex-wrap items-center gap-2">
                     <p className="text-[16px] font-[650]">{place.name}</p>
-                    <span className="rounded-full border border-status-good/30 bg-status-good/10 px-2 py-0.5 text-[13px] font-[650] text-status-good">
+                    <span className="rounded-full border border-status-good/30 bg-status-good-surface px-2 py-0.5 text-[13px] font-[650] text-status-good-text">
                       Dream Verified
                     </span>
                   </div>
                   {display.knownLimitations.length > 0 && (
-                    <p className="mt-2 text-[14px] text-status-warn">
+                    <p className="mt-2 text-[14px] text-status-warn-text">
                       {display.knownLimitations[0]}
                     </p>
                   )}

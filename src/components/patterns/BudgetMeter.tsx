@@ -66,8 +66,8 @@ export function BudgetMeter({ budget, compact = false }: { budget: BudgetView; c
         className={clsx(
           'mt-2 text-[14px]',
           copy.tone === 'good' && 'text-text-secondary',
-          copy.tone === 'warn' && 'font-[650] text-status-warn',
-          copy.tone === 'danger' && 'font-[650] text-status-danger',
+          copy.tone === 'warn' && 'font-[650] text-status-warn-text',
+          copy.tone === 'danger' && 'font-[650] text-status-danger-text',
         )}
         {...(copy.tone === 'good' ? {} : { role: 'alert' })}
       >
@@ -82,7 +82,7 @@ export function BudgetMeter({ budget, compact = false }: { budget: BudgetView; c
           </div>
           <div className="flex justify-between gap-2 border-t border-border-subtle pt-2">
             <dt className="text-text-secondary">Remaining</dt>
-            <dd className={clsx('font-[650]', overspent && 'text-status-warn')}>
+            <dd className={clsx('font-[650]', overspent && 'text-status-warn-text')}>
               {formatInr(budget.remainingMinor)}
             </dd>
           </div>
@@ -106,7 +106,7 @@ export function BudgetMeter({ budget, compact = false }: { budget: BudgetView; c
 
 /** The four price provenance states, labelled distinctly (T08). */
 const PRICE_STATE_COPY = {
-  live: { text: 'Checked just now', tone: 'text-status-good' },
+  live: { text: 'Checked just now', tone: 'text-status-good-text' },
   partner: { text: 'From a provider', tone: 'text-text-secondary' },
   historical: { text: 'Typical price', tone: 'text-text-secondary' },
   manual: { text: 'You entered this', tone: 'text-text-secondary' },

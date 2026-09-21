@@ -267,7 +267,7 @@ export function TripWorkspace({
               role="alert"
               data-testid="conflict"
               data-kind={conflict.kind}
-              className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-status-warn/40 bg-status-warn/10 p-3 text-[14px]"
+              className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-status-warn/40 bg-status-warn-surface p-3 text-[14px]"
             >
               <span>{conflict.message}</span>
               <Button
@@ -350,7 +350,7 @@ export function TripWorkspace({
       <div className="mt-4 gap-4 lg:grid lg:grid-cols-[45fr_55fr]">
         <section
           aria-label="Timeline"
-          className={view === 'map' ? 'hidden lg:block' : 'block'}
+          className={view === 'map' ? 'hidden min-w-0 lg:block' : 'block min-w-0'}
         >
           {day === undefined ? (
             <p className="text-[16px] text-text-secondary">This trip has no days yet.</p>
@@ -485,7 +485,7 @@ export function TripWorkspace({
 
         <section
           aria-label="Map"
-          className={view === 'timeline' ? 'hidden lg:block' : 'block'}
+          className={view === 'timeline' ? 'hidden min-w-0 lg:block' : 'block min-w-0'}
         >
           <TripMap
             places={state.places.filter((place) =>

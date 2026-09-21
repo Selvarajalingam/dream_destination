@@ -259,11 +259,11 @@ export function Shortlist() {
               </div>
 
               <p data-testid="advantage" className="mt-4 text-[14px]">
-                <span className="font-[650] text-status-good">Suits you: </span>
+                <span className="font-[650] text-status-good-text">Suits you: </span>
                 {option.advantage}
               </p>
               <p data-testid="trade-off" className="mt-1 text-[14px]">
-                <span className="font-[650] text-status-warn">Trade-off: </span>
+                <span className="font-[650] text-status-warn-text">Trade-off: </span>
                 {option.tradeOff}
               </p>
 

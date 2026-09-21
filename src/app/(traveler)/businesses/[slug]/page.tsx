@@ -36,7 +36,7 @@ export default async function BusinessPage({ params }: { params: Promise<{ slug:
         <div className="flex flex-wrap items-center gap-2">
           <h1 className="text-[26px] lg:text-[32px]">{business.name}</h1>
           {business.ownerVerified && (
-            <span className="rounded-full border border-status-good/30 bg-status-good/10 px-3 py-1 text-[13px] font-[650] text-status-good">
+            <span className="rounded-full border border-status-good/30 bg-status-good-surface px-3 py-1 text-[13px] font-[650] text-status-good-text">
               Owner verified
             </span>
           )}

@@ -82,8 +82,8 @@ export function DecisionForm({
 
   if (done) {
     return (
-      <div role="status" className="mt-3 rounded-[16px] border border-status-good/40 bg-status-good/10 p-4">
-        <p className="text-[16px] font-[650] text-status-good">Decision recorded</p>
+      <div role="status" className="mt-3 rounded-[16px] border border-status-good/40 bg-status-good-surface p-4">
+        <p className="text-[16px] font-[650] text-status-good-text">Decision recorded</p>
         <p className="mt-1 text-[14px]">
           The audit log has the reason and who made the decision.{' '}
           <a
@@ -148,7 +148,7 @@ export function DecisionForm({
       )}
 
       {error !== null && (
-        <p role="alert" className="mt-3 text-[14px] font-[650] text-status-danger">
+        <p role="alert" className="mt-3 text-[14px] font-[650] text-status-danger-text">
           {error}
         </p>
       )}

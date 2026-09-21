@@ -44,7 +44,7 @@ export function SourceFreshnessLabel({
       data-testid="source-freshness"
       className={clsx(
         'text-[14px]',
-        isStale ? 'font-[650] text-status-warn' : 'text-text-secondary',
+        isStale ? 'font-[650] text-status-warn-text' : 'text-text-secondary',
         className,
       )}
     >
@@ -107,7 +107,7 @@ export function DreamVerifiedBadge({ display }: { display: VerificationView }) {
         type="button"
         onClick={() => setOpen(true)}
         data-testid="dream-verified-badge"
-        className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-status-good/30 bg-status-good/10 px-3 text-[14px] font-[650] text-status-good"
+        className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-status-good/30 bg-status-good-surface px-3 text-[14px] font-[650] text-status-good-text"
       >
         <svg width="16" height="16" viewBox="0 0 24 24" role="img" fill="none" stroke="currentColor" strokeWidth={2.4}>
           <title>Verified</title>
@@ -145,7 +145,7 @@ export function DreamVerifiedBadge({ display }: { display: VerificationView }) {
               {display.knownLimitations.map((limitation) => (
                 <li
                   key={limitation}
-                  className="rounded-xl border border-status-warn/30 bg-status-warn/10 p-3 text-[14px]"
+                  className="rounded-xl border border-status-warn/30 bg-status-warn-surface p-3 text-[14px]"
                 >
                   {limitation}
                 </li>
@@ -194,9 +194,9 @@ export function KnownLimitations({ limitations }: { limitations: string[] }) {
     <section
       data-testid="known-limitations"
       aria-label="Known limitations"
-      className="rounded-[16px] border border-status-warn/40 bg-status-warn/10 p-4"
+      className="rounded-[16px] border border-status-warn/40 bg-status-warn-surface p-4"
     >
-      <h3 className="text-[16px] font-[650] text-status-warn">Before you go</h3>
+      <h3 className="text-[16px] font-[650] text-status-warn-text">Before you go</h3>
       <ul className="mt-2 space-y-2 text-[14px]">
         {limitations.map((limitation) => (
           <li key={limitation} className="flex gap-2">

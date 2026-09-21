@@ -143,7 +143,7 @@ export function Conversation({ initialMessage }: { initialMessage: string | null
 
   return (
     <div className="mt-4 grid gap-5 lg:grid-cols-[1fr_360px]">
-      <div className="order-2 lg:order-1">
+      <div className="order-2 min-w-0 lg:order-1">
         {mode === 'deterministic' && messages.length > 0 && (
           <p className="mb-3 rounded-xl border border-border-subtle bg-surface-subtle p-3 text-[14px] text-text-secondary">
             Planning without the assistant right now. We are reading your request with a simpler
@@ -157,8 +157,8 @@ export function Conversation({ initialMessage }: { initialMessage: string | null
               key={index}
               className={
                 message.role === 'user'
-                  ? 'ml-auto max-w-[85%] rounded-[16px] bg-brand-primary px-4 py-3 text-[16px] text-white'
-                  : 'mr-auto max-w-[85%] rounded-[16px] border border-border-subtle px-4 py-3 text-[16px]'
+                  ? 'ml-auto max-w-[85%] overflow-wrap-anywhere rounded-[16px] bg-brand-primary px-4 py-3 text-[16px] text-white'
+                  : 'mr-auto max-w-[85%] overflow-wrap-anywhere rounded-[16px] border border-border-subtle px-4 py-3 text-[16px]'
               }
             >
               {message.text}
@@ -208,7 +208,7 @@ export function Conversation({ initialMessage }: { initialMessage: string | null
             void send(input, brief);
             setInput('');
           }}
-          className="mt-4 flex gap-2"
+          className="mt-4 flex flex-wrap gap-2"
         >
           <label htmlFor="composer" className="visually-hidden">
             Message
@@ -218,7 +218,7 @@ export function Conversation({ initialMessage }: { initialMessage: string | null
             value={input}
             onChange={(event) => setInput(event.target.value)}
             placeholder="Add a detail, or answer the question above"
-            className="min-h-[52px] flex-1 rounded-[12px] border border-border-subtle px-4 text-[16px]"
+            className="min-h-[52px] min-w-0 flex-1 basis-48 rounded-[12px] border border-border-subtle px-4 text-[16px]"
             disabled={busy}
           />
           <Button type="submit" disabled={busy || input.trim() === ''}>
@@ -233,7 +233,7 @@ export function Conversation({ initialMessage }: { initialMessage: string | null
         )}
       </div>
 
-      <Card className="order-1 h-fit p-4 lg:order-2 lg:sticky lg:top-4">
+      <Card className="order-1 h-fit min-w-0 p-4 lg:order-2 lg:sticky lg:top-4">
         <TripSummaryPanel brief={brief} highlighted={highlighted} onChange={setBrief} />
       </Card>
     </div>

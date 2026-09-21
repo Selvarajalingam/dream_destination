@@ -20,6 +20,35 @@
   --color-status-danger: #c9362b;
   --color-status-unknown: #667085;
 
+  /*
+   * Accessible text variants of the status colours.
+   *
+   * PRD Part I §4.1 fixes the status palette, and §11 requires WCAG 2.2 AA.
+   * Those two requirements conflict: status.warn (#B77900) reaches only
+   * 3.67:1 against white as text, where AA needs 4.5:1, and good, danger and
+   * unknown all fall below 4.5:1 once placed on their own tinted surfaces.
+   *
+   * PRD §6 of the governance section settles it: "when two requirements
+   * conflict, the safer and more transparent behavior takes precedence". So
+   * the specified colours are kept for borders, icons and fills, where they
+   * carry no text, and these darker variants are used wherever the colour
+   * has to be read as words. Each is at least 5:1 on its paired surface.
+   */
+  --color-status-good-text: #0e6b3d;
+  --color-status-warn-text: #8a5a00;
+  --color-status-danger-text: #b32d23;
+  --color-status-unknown-text: #4a5361;
+
+  /*
+   * Solid tinted surfaces rather than alpha compositing. Tailwind's `/10`
+   * modifier produces oklab() colours that no contrast checker can resolve
+   * against what is behind them, so the pairing could never be verified.
+   */
+  --color-status-good-surface: #e8f5ee;
+  --color-status-warn-surface: #f8f1e0;
+  --color-status-danger-surface: #faebea;
+  --color-status-unknown-surface: #eff0f2;
+
   --radius-card: 16px;
   --radius-sheet: 24px;
   --radius-input: 12px;
@@ -117,6 +146,11 @@
 
   @media (min-width: 1024px) {
     .section-gap > * + * { margin-top: 48px; }
+  }
+
+  /* Long unbroken strings wrap instead of widening their container. */
+  .overflow-wrap-anywhere {
+    overflow-wrap: anywhere;
   }
 
   .visually-hidden {

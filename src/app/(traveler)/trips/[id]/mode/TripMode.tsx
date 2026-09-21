@@ -235,7 +235,7 @@ export function TripMode({
                   key={`${alert.kind}-${index}`}
                   data-testid="alert"
                   data-priority={ALERT_PRIORITY[alert.kind] ?? 9}
-                  className="rounded-xl border border-status-warn/40 bg-status-warn/10 p-3"
+                  className="rounded-xl border border-status-warn/40 bg-status-warn-surface p-3"
                 >
                   <p className="text-[14px]">{alert.message}</p>
                   <p className="mt-1 text-[13px] text-text-secondary">{alert.suggestedAction}</p>
@@ -283,7 +283,7 @@ export function TripMode({
             <Link
               href="/help"
               data-touch-target
-              className="flex min-h-[60px] flex-col items-center justify-center bg-status-danger/10 text-[13px] font-[700] text-status-danger"
+              className="flex min-h-[60px] flex-col items-center justify-center bg-status-danger-surface text-[13px] font-[700] text-status-danger-text"
             >
               Help
             </Link>
@@ -298,7 +298,7 @@ function Countdown({ startsAt, now }: { startsAt: string; now: Date }) {
   const minutes = Math.round((new Date(startsAt).getTime() - now.getTime()) / 60_000);
 
   if (minutes <= 0) {
-    return <p className="mt-2 text-[16px] font-[650] text-status-good">Happening now</p>;
+    return <p className="mt-2 text-[16px] font-[650] text-status-good-text">Happening now</p>;
   }
 
   if (minutes < 60) {

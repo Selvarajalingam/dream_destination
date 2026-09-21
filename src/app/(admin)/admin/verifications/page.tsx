@@ -12,10 +12,10 @@ import { EmptyState } from '@/components/states/states';
 export const dynamic = 'force-dynamic';
 
 const STATUS_TONE: Record<string, string> = {
-  under_review: 'bg-status-warn/10 text-status-warn',
+  under_review: 'bg-status-warn-surface text-status-warn-text',
   evidence_pending: 'bg-surface-subtle text-text-secondary',
-  changes_requested: 'bg-status-warn/10 text-status-warn',
-  approved: 'bg-status-danger/10 text-status-danger',
+  changes_requested: 'bg-status-warn-surface text-status-warn-text',
+  approved: 'bg-status-danger-surface text-status-danger-text',
 };
 
 export default async function ReviewQueuePage() {

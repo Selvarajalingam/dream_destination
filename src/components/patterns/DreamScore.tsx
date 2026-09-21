@@ -61,7 +61,7 @@ export function DreamScoreSummary({ score }: { score: DreamScoreView }) {
         <ul className="mt-2 space-y-1 text-[14px]">
           {score.reasons.slice(0, 3).map((reason) => (
             <li key={reason} className="flex gap-2">
-              <span aria-hidden="true" className="text-status-good">
+              <span aria-hidden="true" className="text-status-good-text">
                 ✓
               </span>
               <span>{reason}</span>
@@ -112,7 +112,7 @@ export function DreamScoreDetailSheet({
                 </dt>
                 <dd className="text-[14px] font-[650]">
                   {isMissing ? (
-                    <span className="text-status-unknown">Not enough information</span>
+                    <span className="text-status-unknown-text">Not enough information</span>
                   ) : (
                     `${Math.round(value)}/100`
                   )}

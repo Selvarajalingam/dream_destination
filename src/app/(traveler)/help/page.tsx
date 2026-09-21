@@ -76,7 +76,7 @@ export default async function HelpPage({
                           ` · checked ${formatSourceDate(facility.verifiedAt)}`}
                       </p>
                       {facility.isStale && (
-                        <p className="text-[14px] font-[650] text-status-warn">
+                        <p className="text-[14px] font-[650] text-status-warn-text">
                           Past its review date — confirm before relying on it
                         </p>
                       )}

@@ -258,7 +258,7 @@ export function BudgetEditor({
       </section>
 
       {summary.missingPriceLines.length > 0 && (
-        <p role="status" className="mt-4 rounded-xl border border-status-warn/40 bg-status-warn/10 p-3 text-[14px]">
+        <p role="status" className="mt-4 rounded-xl border border-status-warn/40 bg-status-warn-surface p-3 text-[14px]">
           {summary.missingPriceLines.length} item
           {summary.missingPriceLines.length === 1 ? ' has' : 's have'} no price range yet, so the
           total is less certain than it looks.

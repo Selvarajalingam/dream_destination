@@ -129,7 +129,7 @@ function Health({ label, value, warn }: { label: string; value: string; warn: bo
   return (
     <div className="border-t border-border-subtle pt-1">
       <dt className="text-text-secondary">{label}</dt>
-      <dd className={warn ? 'font-[650] text-status-warn' : 'font-[650]'}>{value}</dd>
+      <dd className={warn ? 'font-[650] text-status-warn-text' : 'font-[650]'}>{value}</dd>
     </div>
   );
 }
@@ -238,7 +238,7 @@ function OverrideForm({ place, onClose }: { place: PlaceRow; onClose: () => void
         </label>
 
         {error !== null && (
-          <p role="alert" className="mt-3 text-[14px] font-[650] text-status-danger">
+          <p role="alert" className="mt-3 text-[14px] font-[650] text-status-danger-text">
             {error}
           </p>
         )}

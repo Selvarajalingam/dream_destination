@@ -90,7 +90,7 @@ export default async function PlacePage({ params }: { params: Promise<{ slug: st
       {display.status === 'expired' && (
         <p
           role="status"
-          className="mt-3 rounded-xl border border-status-warn/40 bg-status-warn/10 p-3 text-[14px] font-[650] text-status-warn"
+          className="mt-3 rounded-xl border border-status-warn/40 bg-status-warn-surface p-3 text-[14px] font-[650] text-status-warn-text"
         >
           This place&apos;s verification has passed its review date, so the Dream Verified badge is
           not shown. The recorded limitations above still apply.

@@ -162,7 +162,7 @@ export function OfflinePack({
       <h1 className="mt-2 text-[26px] lg:text-[32px]">Offline trip pack</h1>
 
       {!supported && (
-        <p className="mt-3 rounded-xl border border-status-warn/40 bg-status-warn/10 p-3 text-[14px]">
+        <p className="mt-3 rounded-xl border border-status-warn/40 bg-status-warn-surface p-3 text-[14px]">
           This browser cannot store an offline pack. Your plan still works normally with a
           connection, and the emergency numbers are shown on the Nearby Help screen.
         </p>
@@ -215,8 +215,8 @@ export function OfflinePack({
                     result === undefined
                       ? 'text-text-secondary'
                       : result.ok
-                        ? 'font-[650] text-status-good'
-                        : 'font-[650] text-status-warn'
+                        ? 'font-[650] text-status-good-text'
+                        : 'font-[650] text-status-warn-text'
                   }
                 >
                   {result === undefined

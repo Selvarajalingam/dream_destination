@@ -102,7 +102,7 @@ export default async function PlaceRulesPage({ params }: { params: Promise<{ slu
                       {rule.isStale && (
                         <p
                           role="status"
-                          className="mt-2 text-[14px] font-[650] text-status-warn"
+                          className="mt-2 text-[14px] font-[650] text-status-warn-text"
                         >
                           This rule is past its review date. It is still shown because it may well
                           still apply, but confirm it with the issuing authority before you rely on

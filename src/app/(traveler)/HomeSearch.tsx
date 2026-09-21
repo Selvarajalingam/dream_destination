@@ -38,7 +38,7 @@ export function HomeSearch() {
           event.preventDefault();
           start(value);
         }}
-        className="flex flex-col gap-2 sm:flex-row"
+        className="flex flex-col gap-2 sm:flex-row sm:flex-wrap"
       >
         <label htmlFor="home-search" className="visually-hidden">
           Where do you want to dream today?
@@ -51,7 +51,7 @@ export function HomeSearch() {
           onChange={(event) => setValue(event.target.value)}
           placeholder="A 4 day family trip from Coimbatore under ₹25,000"
           autoComplete="off"
-          className="min-h-[52px] flex-1 rounded-[12px] border border-border-subtle bg-surface-base px-4 text-[16px] placeholder:text-text-secondary"
+          className="min-h-[52px] min-w-0 flex-1 basis-48 rounded-[12px] border border-border-subtle bg-surface-base px-4 text-[16px] placeholder:text-text-secondary"
         />
         <Button type="submit" disabled={value.trim() === ''}>
           Start planning

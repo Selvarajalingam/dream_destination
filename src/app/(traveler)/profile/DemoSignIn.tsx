@@ -74,7 +74,7 @@ export function DemoSignIn({ isAdmin }: { isAdmin: boolean }) {
       </ul>
 
       {error !== null && (
-        <p role="alert" className="mt-3 text-[14px] font-[650] text-status-danger">
+        <p role="alert" className="mt-3 text-[14px] font-[650] text-status-danger-text">
           {error}
         </p>
       )}

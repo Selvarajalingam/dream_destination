@@ -118,7 +118,7 @@ export default async function VerificationWorkspacePage({
                 {display.knownLimitations.map((limitation) => (
                   <li
                     key={limitation}
-                    className="rounded-xl border border-status-warn/40 bg-status-warn/10 p-3 text-[14px]"
+                    className="rounded-xl border border-status-warn/40 bg-status-warn-surface p-3 text-[14px]"
                   >
                     {limitation}
                   </li>
