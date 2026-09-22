@@ -151,7 +151,9 @@ async function parseBody<TBody>(request: NextRequest, schema: ZodType<TBody> | u
   const parsed = schema.safeParse(raw);
   if (!parsed.success) {
     const issue = parsed.error.issues[0];
-    const path = issue?.path.join('.') ?? 'body';
+    // A problem with the body as a whole has an empty path; name it rather
+    // than rendering ": Invalid input" with nothing before the colon.
+    const path = issue === undefined || issue.path.length === 0 ? 'body' : issue.path.join('.');
     throw problems.validation(`${path}: ${issue?.message ?? 'is not valid'}`);
   }
 
