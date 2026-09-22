@@ -124,6 +124,28 @@ describe('detectConflicts', () => {
     }
   });
 
+  it('blocks a stop the tourism authority has suspended', () => {
+    const context = baseContext();
+    context.placesById['p-a'].suspended = true;
+    const conflicts = detectConflicts(day([item('a')]), context);
+
+    expect(conflicts).toHaveLength(1);
+    expect(conflicts[0]).toMatchObject({ kind: 'weather_closure', severity: 'blocking', itemId: 'a' });
+    expect(conflicts[0].message).toMatch(/closed to visitors/);
+  });
+
+  it('reports only the suspension for a suspended stop, not its hours or crowds as well', () => {
+    const context = baseContext({
+      crowdByPlaceId: { 'p-a': { band: 'heavy', label: 'Heavy crowd', explanation: 'x' } },
+    });
+    context.placesById['p-a'].suspended = true;
+    const conflicts = detectConflicts(
+      day([item('a', { startsAt: new Date('2026-12-20T20:00:00Z') })]),
+      context,
+    );
+    expect(conflicts.map((conflict) => conflict.kind)).toEqual(['weather_closure']);
+  });
+
   it('does not flag opening hours for an item with no place', () => {
     const conflicts = detectConflicts(
       day([item('x', { placeId: null, startsAt: new Date('2026-12-20T20:00:00Z') })]),

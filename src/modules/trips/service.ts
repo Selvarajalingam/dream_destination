@@ -220,6 +220,7 @@ export const tripsService = {
         openingHours: place.operatingHours as ConflictPlace['openingHours'],
         accessibility: place.accessibility as ConflictPlace['accessibility'],
         closureNote: (place.accessibility.closureNote as string | null) ?? null,
+        suspended: place.status === 'suspended',
       };
     }
 

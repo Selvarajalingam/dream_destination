@@ -52,13 +52,23 @@ describe('DreamVerifiedBadge', () => {
     expect(screen.getByTestId('reviewer-type')).toHaveTextContent(/district tourism office/i);
   });
 
-  it('lists known limitations and offers a report action', async () => {
+  it('lists known limitations and renders the report control it is given', async () => {
     const user = userEvent.setup();
-    render(<DreamVerifiedBadge display={approved} />);
+    render(
+      <DreamVerifiedBadge display={approved} report={<button type="button">Report a concern</button>} />,
+    );
 
     await user.click(screen.getByTestId('dream-verified-badge'));
     expect(screen.getByText(/mobile coverage becomes unreliable/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /report a concern/i })).toBeInTheDocument();
+  });
+
+  it('renders no dead report button when no report control is supplied', async () => {
+    const user = userEvent.setup();
+    render(<DreamVerifiedBadge display={approved} />);
+
+    await user.click(screen.getByTestId('dream-verified-badge'));
+    expect(screen.queryByRole('button', { name: /report/i })).not.toBeInTheDocument();
   });
 
   it('states plainly that the badge is not a guarantee', async () => {

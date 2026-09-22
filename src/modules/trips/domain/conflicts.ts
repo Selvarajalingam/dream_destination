@@ -100,6 +100,21 @@ function conflictsForItem(item: ItineraryItem, context: ConflictContext): Confli
   const place = context.placesById[item.placeId];
   if (place === undefined) return conflicts;
 
+  // A suspension overrides every other consideration about this stop. Hours,
+  // crowds and access are irrelevant for a place nobody should visit, so this
+  // is the only conflict reported for it.
+  if (place.suspended === true) {
+    return [
+      {
+        kind: 'weather_closure',
+        severity: 'blocking',
+        message: `${place.name} has been closed to visitors by the tourism authority pending a review.`,
+        suggestedAction: 'Remove this stop, or replace it with another place nearby.',
+        itemId: item.id,
+      },
+    ];
+  }
+
   if (item.startsAt !== null && !isWithinOpeningHours(place.openingHours, item.startsAt, item.durationMinutes)) {
     const label = openingHoursLabel(place.openingHours, item.startsAt);
     conflicts.push({

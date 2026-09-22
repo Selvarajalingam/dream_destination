@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { businessRepository } from '@/modules/businesses/repository';
 import { Button, Card } from '@/components/ui/primitives';
+import { ReportConcern } from '@/components/patterns/ReportConcern';
 import { formatSourceDate } from '@/shared/time';
 
 /**
@@ -157,13 +158,12 @@ export default async function BusinessPage({ params }: { params: Promise<{ slug:
         </a>
       </div>
 
-      <p className="mt-4 text-[14px] text-text-secondary">
-        Details are provided by the business owner and checked at onboarding. Something wrong?{' '}
-        <Link href="/profile" className="text-brand-primary underline underline-offset-2">
-          Report an issue
-        </Link>
-        .
-      </p>
+      <div className="mt-4 flex flex-wrap items-center gap-3">
+        <p className="text-[14px] text-text-secondary">
+          Details are provided by the business owner and checked at onboarding. Something wrong?
+        </p>
+        <ReportConcern entityType="business" slug={business.slug} name={business.name} label="Report an issue" />
+      </div>
     </article>
   );
 }

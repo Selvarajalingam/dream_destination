@@ -1,7 +1,7 @@
 'use client';
 
 import clsx from 'clsx';
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { Sheet } from '@/components/ui/primitives';
 import { formatSourceDate } from '@/shared/time';
 
@@ -96,7 +96,14 @@ export type VerificationView = {
  * date, next review, verified attributes, known limitations, reviewer type and
  * a report-concern action.
  */
-export function DreamVerifiedBadge({ display }: { display: VerificationView }) {
+export function DreamVerifiedBadge({
+  display,
+  report,
+}: {
+  display: VerificationView;
+  /** The report-concern control, supplied by the page that knows the place. */
+  report?: ReactNode;
+}) {
   const [open, setOpen] = useState(false);
 
   if (!display.showBadge) return null;
@@ -175,12 +182,7 @@ export function DreamVerifiedBadge({ display }: { display: VerificationView }) {
           conditions, and it does not cover anything outside the list above.
         </p>
 
-        <button
-          type="button"
-          className="mt-4 min-h-[44px] rounded-xl border border-border-subtle px-4 text-[14px] font-[650]"
-        >
-          Report a concern
-        </button>
+        {report !== undefined && <div className="mt-4">{report}</div>}
       </Sheet>
     </>
   );

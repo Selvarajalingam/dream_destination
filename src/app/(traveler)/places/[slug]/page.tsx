@@ -13,6 +13,7 @@ import {
   SourceFreshnessLabel,
 } from '@/components/patterns/trust';
 import { Button, Card } from '@/components/ui/primitives';
+import { ReportConcern } from '@/components/patterns/ReportConcern';
 import { formatInrRange } from '@/shared/money';
 import { formatDistance } from '@/shared/geo';
 
@@ -67,6 +68,7 @@ export default async function PlacePage({ params }: { params: Promise<{ slug: st
               reviewerType: display.reviewerType,
               checklistGroups: display.checklistGroups,
             }}
+            report={<ReportConcern entityType="place" slug={place.slug} name={place.name} />}
           />
         </div>
         <p className="mt-1 text-[14px] capitalize text-text-secondary">
@@ -240,6 +242,11 @@ export default async function PlacePage({ params }: { params: Promise<{ slug: st
           Coordinates work even when routing is unavailable, so this link never depends on a
           provider being reachable.
         </p>
+      </section>
+
+      <section className="mt-6 flex flex-wrap items-center gap-3">
+        <p className="text-[14px] text-text-secondary">Seen something wrong or unsafe here?</p>
+        <ReportConcern entityType="place" slug={place.slug} name={place.name} />
       </section>
 
       {/* The visit action sits after the limitations, never before them. */}

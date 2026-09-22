@@ -62,6 +62,11 @@ export type ConflictPlace = {
   accessibility: PlaceAccessibility;
   /** A known seasonal or weather closure, if any. */
   closureNote: string | null;
+  /**
+   * Closed to visitors by the tourism authority, typically after a safety
+   * report. Optional so existing callers read as not suspended.
+   */
+  suspended?: boolean;
 };
 
 export type ConflictCrowd = {
