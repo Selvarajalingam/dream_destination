@@ -1,5 +1,6 @@
 import { getAiGateway } from '@/platform/ai';
 import { tripsService } from '@/modules/trips/service';
+import { analyticsService } from '@/modules/analytics/service';
 import { assertOwnsTrip } from '@/server/authorize';
 import { json, route } from '@/server/handler';
 
@@ -20,6 +21,16 @@ export const POST = route(
     await assertOwnsTrip(session, params.id);
 
     const detail = await tripsService.generateItinerary(params.id);
+
+    await analyticsService.track(
+      'itinerary_generated',
+      {
+        tripId: detail.trip.id,
+        days: detail.days.length,
+        itemCount: detail.days.reduce((total, day) => total + day.items.length, 0),
+      },
+      { sessionId: session.id },
+    );
 
     const prose = await getAiGateway().describeItinerary({
       destinationName: detail.trip.destinationName ?? 'your destination',

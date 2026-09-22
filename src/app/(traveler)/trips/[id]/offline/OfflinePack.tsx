@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { Button, Card } from '@/components/ui/primitives';
 import type { OfflineManifest } from '@/modules/offline/domain/manifest';
 import { formatSourceDate } from '@/shared/time';
+import { track } from '@/lib/track';
 
 /**
  * Screen T21 — the offline pack controls.
@@ -92,6 +93,7 @@ export function OfflinePack({
         setResults(data.results);
         setStatus(data.status);
         setSavedAt(new Date());
+        track('offline_pack_saved', { tripId, outcome: data.status });
         try {
           localStorage.setItem(
             `dd.pack.${tripId}`,

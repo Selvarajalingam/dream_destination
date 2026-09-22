@@ -10,6 +10,7 @@ import { ErrorState, LoadingState } from '@/components/states/states';
 import { ApiProblemError, api } from '@/lib/api-client';
 import { formatInr } from '@/shared/money';
 import { formatDistance } from '@/shared/geo';
+import { track } from '@/lib/track';
 
 /**
  * Screen T09 — the itinerary workspace.
@@ -274,6 +275,12 @@ export function TripWorkspace({
                 size="small"
                 variant="secondary"
                 onClick={() => {
+                  if (conflict.kind === 'crowd_peak' && conflict.itemId !== null) {
+                    const placeId = state.days
+                      .flatMap((entry) => entry.items)
+                      .find((entry) => entry.id === conflict.itemId)?.placeId;
+                    if (placeId != null) track('crowd_alternative_accepted', { tripId: state.trip.id, placeId });
+                  }
                   if (conflict.kind === 'budget_overrun') {
                     window.location.href = `/trips/${state.trip.id}/budget`;
                   } else if (day !== undefined) {

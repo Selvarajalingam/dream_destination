@@ -3,6 +3,7 @@
 import clsx from 'clsx';
 import { useState } from 'react';
 import { Sheet } from '@/components/ui/primitives';
+import { track } from '@/lib/track';
 
 /**
  * Dream Score — PRD Part I §5.2.
@@ -50,7 +51,7 @@ export function DreamScoreBadge({ score, className }: { score: DreamScoreView; c
   );
 }
 
-export function DreamScoreSummary({ score }: { score: DreamScoreView }) {
+export function DreamScoreSummary({ score, destinationId }: { score: DreamScoreView; destinationId?: string }) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -71,7 +72,10 @@ export function DreamScoreSummary({ score }: { score: DreamScoreView }) {
 
         <button
           type="button"
-          onClick={() => setOpen(true)}
+          onClick={() => {
+            setOpen(true);
+            if (destinationId !== undefined) track('dream_score_opened', { destinationId });
+          }}
           className="mt-2 min-h-[44px] text-[14px] font-[650] text-brand-primary underline underline-offset-2"
         >
           Why this matches

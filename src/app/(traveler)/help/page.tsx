@@ -2,6 +2,7 @@ import { helpRepository, NATIONAL_EMERGENCY_NUMBER, FACILITY_ORDER } from '@/mod
 import { HelpActions } from './HelpActions';
 import { formatDistance } from '@/shared/geo';
 import { formatSourceDate } from '@/shared/time';
+import { trackPage } from '@/server/track-page';
 
 /**
  * Screen T18 — Nearby Help.
@@ -38,6 +39,8 @@ export default async function HelpPage({
     lat === undefined || lng === undefined ? PILOT_CENTER : { lat: Number(lat), lng: Number(lng) };
 
   const facilities = await helpRepository.findNearby(point, 60_000, FACILITY_ORDER, 40);
+
+  await trackPage('help_opened', { source: 'navigation' });
 
   const grouped = new Map<string, typeof facilities>();
   for (const facility of facilities) {

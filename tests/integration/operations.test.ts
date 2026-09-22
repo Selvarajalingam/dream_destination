@@ -17,9 +17,18 @@ describe('operationsService.overview (A01)', () => {
   });
 
   it('counts every open incident', async () => {
+    // Compared with the live table rather than the seed's four, because other
+    // test files file reports of their own and run in no fixed order.
+    const [{ open, critical }] = await sql<{ open: number; critical: number }[]>`
+      SELECT count(*)::int AS open,
+             count(*) FILTER (WHERE severity = 'critical')::int AS critical
+      FROM incident_reports WHERE status IN ('open', 'investigating')
+    `;
     const overview = await operationsService.overview();
-    expect(overview.counts.openIncidents).toBe(4);
-    expect(overview.counts.criticalIncidents).toBe(1);
+
+    expect(open).toBeGreaterThanOrEqual(4);
+    expect(overview.counts.openIncidents).toBe(open);
+    expect(overview.counts.criticalIncidents).toBe(critical);
   });
 
   it('lists the lapsed verification the seed leaves behind', async () => {

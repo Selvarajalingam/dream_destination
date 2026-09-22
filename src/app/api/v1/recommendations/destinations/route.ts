@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { TripBriefSchema } from '@/platform/ai/schemas';
 import { recommendationsService } from '@/modules/recommendations/service';
+import { analyticsService } from '@/modules/analytics/service';
 import { json, route } from '@/server/handler';
 
 /**
@@ -39,6 +40,8 @@ export const POST = route(
       limit: body.limit,
       persist: session.userId !== null,
     });
+
+    await analyticsService.track('shortlist_viewed', { optionCount: entries.length }, { sessionId: session.id });
 
     return json({
       options: entries.map((entry) => ({

@@ -3,6 +3,7 @@ import { tripsService } from '@/modules/trips/service';
 import { catalogRepository } from '@/modules/catalog/repository';
 import { getSession } from '@/server/session';
 import { TripMode } from './TripMode';
+import { trackPage } from '@/server/track-page';
 
 /**
  * Screens T15–T17 — Trip Mode.
@@ -21,6 +22,8 @@ export default async function TripModePage({ params }: { params: Promise<{ id: s
   const detail = await tripsService.getDetail(id);
 
   if (detail === null || session === null || detail.trip.ownerUserId !== session.userId) notFound();
+
+  await trackPage('trip_mode_started', { tripId: detail.trip.id });
 
   const placeIds = detail.days
     .flatMap((day) => day.items)

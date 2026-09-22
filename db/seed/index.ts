@@ -1,6 +1,7 @@
 import process from 'node:process';
 import postgres, { type Sql } from 'postgres';
 import type { SeedSql } from './types';
+import { seedAnalytics } from './analytics';
 import { seedBusinesses } from './businesses';
 import { seedCrowd } from './crowd';
 import { seedDestinations } from './destinations';
@@ -88,6 +89,7 @@ export async function seed(sql: Sql): Promise<void> {
     await seedStories(tx, placeIds, sourceIds);
     await seedCrowd(tx, placeIds, sourceIds, userIds);
     await seedOperations(tx, placeIds, businessIds, userIds);
+    await seedAnalytics(tx, placeIds, businessIds);
   });
 }
 

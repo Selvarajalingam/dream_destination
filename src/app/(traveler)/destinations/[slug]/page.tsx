@@ -12,6 +12,7 @@ import { SourceFreshnessLabel } from '@/components/patterns/trust';
 import { Card } from '@/components/ui/primitives';
 import { formatInrRange } from '@/shared/money';
 import { formatDistance } from '@/shared/geo';
+import { trackPage } from '@/server/track-page';
 
 /**
  * Screen T06 — Destination Detail.
@@ -49,6 +50,17 @@ export default async function DestinationPage({ params }: { params: Promise<{ sl
     .filter((entry) => entry.display.showBadge);
 
   const nearestHospital = help.find((facility) => facility.facilityType === 'hospital');
+
+  // Each business shown under Support local is an impression (PRD E14-S03).
+  await Promise.all(
+    businesses.map((business) =>
+      trackPage('business_impression', {
+        businessId: business.id,
+        category: business.category as never,
+        surface: 'destination',
+      }),
+    ),
+  );
 
   return (
     <article>

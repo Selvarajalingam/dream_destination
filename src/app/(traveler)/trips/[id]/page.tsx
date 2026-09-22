@@ -4,6 +4,7 @@ import { catalogRepository } from '@/modules/catalog/repository';
 import { businessRepository } from '@/modules/businesses/repository';
 import { getSession } from '@/server/session';
 import { TripWorkspace } from './TripWorkspace';
+import { trackPage } from '@/server/track-page';
 
 /**
  * Screen T09 — Itinerary and Map.
@@ -33,6 +34,19 @@ export default async function TripPage({
   if (detail === null || session === null || detail.trip.ownerUserId !== session.userId) {
     notFound();
   }
+
+  // Each heavy-crowd warning offers a quieter alternative (PRD E14-S04).
+  const crowdedPlaceIds = new Set(
+    detail.days
+      .flatMap((day) => day.items)
+      .filter((item) => item.placeId !== null && detail.crowdByPlaceId[item.placeId]?.band === 'heavy')
+      .map((item) => item.placeId as string),
+  );
+  await Promise.all(
+    [...crowdedPlaceIds].map((placeId) =>
+      trackPage('crowd_alternative_offered', { tripId: detail.trip.id, placeId }),
+    ),
+  );
 
   const placeIds = detail.days
     .flatMap((day) => day.items)

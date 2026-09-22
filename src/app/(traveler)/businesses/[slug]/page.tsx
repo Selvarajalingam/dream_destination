@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation';
 import { businessRepository } from '@/modules/businesses/repository';
 import { Button, Card } from '@/components/ui/primitives';
 import { ReportConcern } from '@/components/patterns/ReportConcern';
+import { trackPage } from '@/server/track-page';
+import { TrackedLink } from '@/components/TrackedLink';
 import { formatSourceDate } from '@/shared/time';
 
 /**
@@ -30,6 +32,8 @@ export default async function BusinessPage({ params }: { params: Promise<{ slug:
   if (business === null) notFound();
 
   const hours = business.operatingHours as Record<string, [string, string] | null>;
+
+  await trackPage('business_detail_viewed', { businessId: business.id, category: business.category as never });
 
   return (
     <article>
@@ -139,15 +143,19 @@ export default async function BusinessPage({ params }: { params: Promise<{ slug:
       <div className="mt-5 flex flex-wrap gap-2">
         <Button>Add to itinerary</Button>
         {business.phone !== null && (
-          <a
+          <TrackedLink
+            event="business_contact"
+            properties={{ businessId: business.id, category: business.category as never }}
             href={`tel:${business.phone}`}
             data-touch-target
             className="inline-flex min-h-[44px] items-center rounded-xl border border-border-subtle px-4 text-[14px] font-[650]"
           >
             Call
-          </a>
+          </TrackedLink>
         )}
-        <a
+        <TrackedLink
+          event="business_directions"
+          properties={{ businessId: business.id, category: business.category as never }}
           href={`https://www.openstreetmap.org/?mlat=${business.lat}&mlon=${business.lng}#map=16/${business.lat}/${business.lng}`}
           target="_blank"
           rel="noreferrer noopener"
@@ -155,7 +163,7 @@ export default async function BusinessPage({ params }: { params: Promise<{ slug:
           className="inline-flex min-h-[44px] items-center rounded-xl border border-border-subtle px-4 text-[14px] font-[650]"
         >
           Open in maps
-        </a>
+        </TrackedLink>
       </div>
 
       <div className="mt-4 flex flex-wrap items-center gap-3">

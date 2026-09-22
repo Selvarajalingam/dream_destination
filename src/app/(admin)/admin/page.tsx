@@ -44,14 +44,14 @@ export default async function OperationsOverviewPage() {
         {overview.headline}
       </p>
 
-      <dl className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+      <ul aria-label="Summary" className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         <Stat label="Open incidents" value={counts.openIncidents} href="/admin/incidents" urgent={counts.criticalIncidents > 0} />
         <Stat label="Lapsed verifications" value={counts.expiredVerifications} href="/admin/verifications" urgent={counts.expiredVerifications > 0} />
         <Stat label="Expiring in 30 days" value={counts.expiringVerifications} href="/admin/verifications" />
         <Stat label="Stale sources" value={counts.staleSources} href="/admin/freshness" />
         <Stat label="Heavy-crowd advisories" value={counts.activeRedOverrides} href="/admin/crowd" />
         <Stat label="Silent crowd feeds" value={counts.failedFeeds} href="/admin/crowd" urgent={counts.failedFeeds > 0} />
-      </dl>
+      </ul>
 
       {overview.items.length === 0 ? (
         <div className="mt-6">
@@ -126,16 +126,21 @@ function Stat({
   href: string;
   urgent?: boolean;
 }) {
+  // Each summary figure is a link to where it can be acted on, so it is a
+  // list of links. A definition list may only hold terms and definitions,
+  // not links wrapping them.
   return (
-    <Link
-      href={href}
-      className={`block rounded-[16px] border p-3 ${
-        urgent ? 'border-status-danger/40 bg-status-danger-surface' : 'border-border-subtle'
-      }`}
-    >
-      <dt className="text-[13px] font-[650] text-text-secondary">{label}</dt>
-      <dd className={`mt-1 text-[26px] font-[750] ${urgent ? 'text-status-danger-text' : ''}`}>{value}</dd>
-    </Link>
+    <li>
+      <Link
+        href={href}
+        className={`block h-full rounded-[16px] border p-3 ${
+          urgent ? 'border-status-danger/40 bg-status-danger-surface' : 'border-border-subtle'
+        }`}
+      >
+        <span className="block text-[13px] font-[650] text-text-secondary">{label}</span>
+        <span className={`mt-1 block text-[26px] font-[750] ${urgent ? 'text-status-danger-text' : ''}`}>{value}</span>
+      </Link>
+    </li>
   );
 }
 

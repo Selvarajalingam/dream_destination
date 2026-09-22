@@ -14,6 +14,7 @@ import {
 } from '@/components/patterns/trust';
 import { Button, Card } from '@/components/ui/primitives';
 import { ReportConcern } from '@/components/patterns/ReportConcern';
+import { trackPage } from '@/server/track-page';
 import { formatInrRange } from '@/shared/money';
 import { formatDistance } from '@/shared/geo';
 
@@ -44,6 +45,8 @@ export default async function PlacePage({ params }: { params: Promise<{ slug: st
   ]);
 
   const display = resolveVerificationDisplay(verification, new Date());
+
+  if (place.isHiddenGem) await trackPage('hidden_gem_viewed', { placeId: place.id });
   const hoursSource = sources.find((source) => source.fieldScope === 'hours') ?? sources[0];
   const accessibility = place.accessibility as Record<string, unknown>;
 

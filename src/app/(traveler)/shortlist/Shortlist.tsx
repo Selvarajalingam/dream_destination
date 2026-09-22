@@ -197,6 +197,7 @@ export function Shortlist() {
 
               <div className="mt-3">
                 <DreamScoreSummary
+                  destinationId={option.destination.id}
                   score={
                     {
                       tripMatch: option.tripMatch,
