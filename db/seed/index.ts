@@ -5,6 +5,7 @@ import { seedBusinesses } from './businesses';
 import { seedCrowd } from './crowd';
 import { seedDestinations } from './destinations';
 import { seedHelpFacilities } from './help';
+import { seedOperations } from './operations';
 import { seedPlaces } from './places';
 import { seedRules } from './rules';
 import { seedSources } from './sources';
@@ -27,6 +28,7 @@ import { seedVerifications } from './verifications';
  * exists.
  */
 const TABLES_TO_CLEAR = [
+  'freshness_assignments',
   'analytics_events',
   'idempotency_keys',
   'offline_packs',
@@ -80,11 +82,12 @@ export async function seed(sql: Sql): Promise<void> {
     const placeIds = await seedPlaces(tx, destinationIds, sourceIds);
 
     await seedVerifications(tx, placeIds, userIds);
-    await seedBusinesses(tx, userIds);
+    const businessIds = await seedBusinesses(tx, userIds);
     await seedHelpFacilities(tx, sourceIds);
     await seedRules(tx, placeIds, destinationIds, sourceIds);
     await seedStories(tx, placeIds, sourceIds);
     await seedCrowd(tx, placeIds, sourceIds, userIds);
+    await seedOperations(tx, placeIds, businessIds, userIds);
   });
 }
 

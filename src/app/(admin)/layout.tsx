@@ -11,9 +11,15 @@ import { isAdmin } from '@/server/authorize';
  * confirming that an admin area exists at a given path is itself information.
  */
 
+/** PRD Part I §3.3 administration navigation. */
 const NAV = [
+  { href: '/admin', label: 'Overview' },
   { href: '/admin/verifications', label: 'Verification' },
   { href: '/admin/crowd', label: 'Crowd' },
+  { href: '/admin/freshness', label: 'Content' },
+  { href: '/admin/businesses', label: 'Businesses' },
+  { href: '/admin/incidents', label: 'Incidents' },
+  { href: '/admin/analytics', label: 'Analytics' },
 ];
 
 export default async function AdminLayout({ children }: { children: ReactNode }) {
@@ -47,10 +53,10 @@ export default async function AdminLayout({ children }: { children: ReactNode })
 
       <header className="border-b border-border-subtle bg-brand-deep text-white">
         <div className="page-gutter flex min-h-[56px] flex-wrap items-center justify-between gap-3 py-2">
-          <Link href="/admin/verifications" className="text-[18px] font-[750]">
+          <Link href="/admin" className="text-[18px] font-[750]">
             Dream Destination · Operations
           </Link>
-          <nav aria-label="Administration" className="flex gap-1">
+          <nav aria-label="Administration" className="flex flex-wrap gap-1">
             {NAV.map((item) => (
               <Link
                 key={item.href}
