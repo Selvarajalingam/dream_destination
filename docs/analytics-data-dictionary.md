@@ -60,7 +60,7 @@ details, health or accessibility needs, or document content.
 | `business_detail_viewed` | A business's page is opened | `businessId`; `category` | Server, business page |
 | `business_directions` | Directions to a business are opened | `businessId`; `category` | Browser, business page |
 | `business_contact` | A business is called | `businessId`; `category` | Browser, business page |
-| `business_itinerary_add` | A business is added to a plan | `businessId`; `category` | Reserved; not yet emitted |
+| `business_itinerary_add` | A business is added to a plan | `businessId`; `category` | Server, add-to-trip endpoint |
 
 `category` is one of: restaurant, homestay, artisan, guide, cafe, farm,
 transport, shop.

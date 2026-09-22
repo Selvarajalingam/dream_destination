@@ -12,7 +12,8 @@ import {
   KnownLimitations,
   SourceFreshnessLabel,
 } from '@/components/patterns/trust';
-import { Button, Card } from '@/components/ui/primitives';
+import { Card } from '@/components/ui/primitives';
+import { AddToTrip } from '@/components/patterns/AddToTrip';
 import { ReportConcern } from '@/components/patterns/ReportConcern';
 import { trackPage } from '@/server/track-page';
 import { formatInrRange } from '@/shared/money';
@@ -254,7 +255,7 @@ export default async function PlacePage({ params }: { params: Promise<{ slug: st
 
       {/* The visit action sits after the limitations, never before them. */}
       <div className="sticky bottom-[80px] mt-6 rounded-[16px] border border-border-subtle bg-surface-base p-3 elevation-2">
-        <Button className="w-full">Add to trip</Button>
+        <AddToTrip kind="place" targetId={place.id} label="Add to trip" className="[&>button]:w-full" />
       </div>
     </article>
   );

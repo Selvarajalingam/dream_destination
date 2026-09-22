@@ -1,7 +1,6 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Button, Card } from '@/components/ui/primitives';
 import { ApiProblemError, api } from '@/lib/api-client';
@@ -62,7 +61,6 @@ export function DetailsForm({
   categoryLabels: Record<string, string>;
   nextHref: string;
 }) {
-  const router = useRouter();
   const [values, setValues] = useState(() => ({
     name: initial.name,
     category: initial.category ?? '',
@@ -86,6 +84,7 @@ export function DetailsForm({
   }));
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [saveState, setSaveState] = useState<SaveState>({ kind: 'idle' });
+  const hydrated = useHydrated();
 
   const dirty = useRef<Set<string>>(new Set());
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -199,235 +198,249 @@ export function DetailsForm({
         </p>
       )}
 
-      <Card className="space-y-4 p-4">
-        <h2 className="text-[18px] font-[650]">{copy.sectionBasics}</h2>
-        <label className="block">
-          <span className="block text-[14px] font-[650]">{copy.businessName}</span>
-          <input
-            name="name"
-            value={values.name}
-            maxLength={80}
-            onChange={(event) => change('name', event.target.value)}
-            aria-invalid={errors.name !== undefined}
-            aria-describedby={errors.name !== undefined ? 'name-error' : undefined}
-            className={input}
-          />
-          {fieldError('name')}
-        </label>
-        <label className="block">
-          <span className="block text-[14px] font-[650]">{copy.category}</span>
-          <select
-            name="category"
-            value={values.category}
-            onChange={(event) => change('category', event.target.value)}
-            className={input}
-          >
-            <option value="" disabled>
-              {copy.chooseCategory}
-            </option>
-            {categories.map((category) => (
-              <option key={category} value={category}>
-                {categoryLabels[category] ?? category}
-              </option>
-            ))}
-          </select>
-          {fieldError('category')}
-        </label>
-        <label className="block">
-          <span className="block text-[14px] font-[650]">{copy.description}</span>
-          <textarea
-            name="description"
-            value={values.description}
-            maxLength={400}
-            rows={3}
-            onChange={(event) => change('description', event.target.value)}
-            aria-describedby="description-help"
-            className="mt-1 block w-full rounded-xl border border-text-secondary/60 bg-surface-base p-3 text-[16px]"
-          />
-          <span id="description-help" className="mt-1 block text-[13px] text-text-secondary">
-            {copy.descriptionHelp}
-          </span>
-          {fieldError('description')}
-        </label>
-      </Card>
-
-      <Card className="space-y-4 p-4">
-        <h2 className="text-[18px] font-[650]">{copy.sectionLocation}</h2>
-        <label className="block">
-          <span className="block text-[14px] font-[650]">{copy.addressLine}</span>
-          <input name="addressLine" value={values.addressLine} maxLength={160} onChange={(event) => change('addressLine', event.target.value)} className={input} />
-          {fieldError('addressLine')}
-        </label>
-        <div className="grid gap-4 sm:grid-cols-2">
+      {/*
+        Disabled until hydrated: on a slow connection, anything typed before
+        the page is interactive would show but never be saved.
+      */}
+      <fieldset disabled={!hydrated} className="m-0 min-w-0 space-y-4 border-0 p-0">
+        <Card className="space-y-4 p-4">
+          <h2 className="text-[18px] font-[650]">{copy.sectionBasics}</h2>
           <label className="block">
-            <span className="block text-[14px] font-[650]">{copy.locality}</span>
-            <input name="locality" value={values.locality} maxLength={80} onChange={(event) => change('locality', event.target.value)} className={input} />
-            {fieldError('locality')}
-          </label>
-          <label className="block">
-            <span className="block text-[14px] font-[650]">{copy.pin}</span>
+            <span className="block text-[14px] font-[650]">{copy.businessName}</span>
             <input
-              name="pin"
-              value={values.pin}
-              inputMode="numeric"
-              autoComplete="postal-code"
-              maxLength={7}
-              onChange={(event) => change('pin', event.target.value)}
-              aria-invalid={errors.pin !== undefined}
-              aria-describedby={errors.pin !== undefined ? 'pin-error' : undefined}
+              name="name"
+              value={values.name}
+              maxLength={80}
+              onChange={(event) => change('name', event.target.value)}
+              aria-invalid={errors.name !== undefined}
+              aria-describedby={errors.name !== undefined ? 'name-error' : undefined}
               className={input}
             />
-            {fieldError('pin')}
-          </label>
-        </div>
-
-        <PinPicker
-          lat={Number(values.lat)}
-          lng={Number(values.lng)}
-          label={copy.sectionLocation}
-          onPick={(point) => {
-            setValues((previous) => ({ ...previous, lat: String(point.lat), lng: String(point.lng) }));
-            latest.current = { ...latest.current, lat: String(point.lat), lng: String(point.lng) };
-            dirty.current.add('location');
-            void flush();
-          }}
-        />
-        <p id="location-help" className="text-[13px] text-text-secondary">
-          {copy.locationHelp}
-        </p>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <label className="block">
-            <span className="block text-[14px] font-[650]">{copy.latitude}</span>
-            <input name="lat" value={values.lat} inputMode="decimal" onChange={(event) => change('lat', event.target.value, 'location')} aria-describedby="location-help" className={input} />
+            {fieldError('name')}
           </label>
           <label className="block">
-            <span className="block text-[14px] font-[650]">{copy.longitude}</span>
-            <input name="lng" value={values.lng} inputMode="decimal" onChange={(event) => change('lng', event.target.value, 'location')} aria-describedby="location-help" className={input} />
-          </label>
-        </div>
-        {fieldError('location')}
-      </Card>
-
-      <Card className="space-y-4 p-4">
-        <h2 className="text-[18px] font-[650]">{copy.sectionContact}</h2>
-        <label className="block">
-          <span className="block text-[14px] font-[650]">{copy.phone}</span>
-          <input
-            name="phone"
-            type="tel"
-            autoComplete="tel"
-            value={values.phone}
-            onChange={(event) => change('phone', event.target.value)}
-            aria-invalid={errors.phone !== undefined}
-            aria-describedby={errors.phone !== undefined ? 'phone-error' : undefined}
-            className={input}
-          />
-          {fieldError('phone')}
-        </label>
-        <label className="block">
-          <span className="block text-[14px] font-[650]">{copy.ownerName}</span>
-          <input name="ownerName" autoComplete="name" value={values.ownerName} maxLength={80} onChange={(event) => change('ownerName', event.target.value)} className={input} />
-          {fieldError('ownerName')}
-        </label>
-      </Card>
-
-      <Card className="p-4">
-        <h2 className="text-[18px] font-[650]">{copy.sectionHours}</h2>
-        <HoursEditor hours={values.hours} dayLabels={DAY_LABEL[locale] ?? DAY_LABEL['en-IN']} copy={copy} onChange={setDay} />
-        {fieldError('hours')}
-      </Card>
-
-      <Card className="space-y-4 p-4">
-        <h2 className="text-[18px] font-[650]">{copy.sectionOffer}</h2>
-        <label className="block">
-          <span className="block text-[14px] font-[650]">{copy.priceBand}</span>
-          <select
-            name="priceBand"
-            value={values.priceBand ?? ''}
-            onChange={(event) => change('priceBand', event.target.value === '' ? null : Number(event.target.value))}
-            className={input}
-          >
-            <option value="">{copy.priceBandNone}</option>
-            {[1, 2, 3, 4].map((band) => (
-              <option key={band} value={band}>
-                {PRICE_LABEL[band]}
+            <span className="block text-[14px] font-[650]">{copy.category}</span>
+            <select
+              name="category"
+              value={values.category}
+              onChange={(event) => change('category', event.target.value)}
+              className={input}
+            >
+              <option value="" disabled>
+                {copy.chooseCategory}
               </option>
-            ))}
-          </select>
-        </label>
-        <label className="block">
-          <span className="block text-[14px] font-[650]">{copy.services}</span>
-          <input name="services" value={values.services} onChange={(event) => change('services', event.target.value)} aria-describedby="services-help" className={input} />
-          <span id="services-help" className="mt-1 block text-[13px] text-text-secondary">
-            {copy.servicesHelp}
-          </span>
-          {fieldError('services')}
-        </label>
-        <fieldset>
-          <legend className="text-[14px] font-[650]">{copy.payments}</legend>
-          <div className="mt-1 flex flex-wrap gap-2">
-            {Object.entries(PAYMENT_LABEL).map(([method, label]) => (
-              <label key={method} className="flex min-h-[44px] items-center gap-2 rounded-xl border border-border-subtle px-3 text-[14px]">
-                <input
-                  type="checkbox"
-                  checked={values.paymentMethods.includes(method)}
-                  onChange={(event) =>
-                    change(
-                      'paymentMethods',
-                      event.target.checked
-                        ? [...latest.current.paymentMethods, method]
-                        : latest.current.paymentMethods.filter((item) => item !== method),
-                    )
-                  }
-                />
-                {label}
-              </label>
-            ))}
+              {categories.map((category) => (
+                <option key={category} value={category}>
+                  {categoryLabels[category] ?? category}
+                </option>
+              ))}
+            </select>
+            {fieldError('category')}
+          </label>
+          <label className="block">
+            <span className="block text-[14px] font-[650]">{copy.description}</span>
+            <textarea
+              name="description"
+              value={values.description}
+              maxLength={400}
+              rows={3}
+              onChange={(event) => change('description', event.target.value)}
+              aria-describedby="description-help"
+              className="mt-1 block w-full rounded-xl border border-text-secondary/60 bg-surface-base p-3 text-[16px]"
+            />
+            <span id="description-help" className="mt-1 block text-[13px] text-text-secondary">
+              {copy.descriptionHelp}
+            </span>
+            {fieldError('description')}
+          </label>
+        </Card>
+
+        <Card className="space-y-4 p-4">
+          <h2 className="text-[18px] font-[650]">{copy.sectionLocation}</h2>
+          <label className="block">
+            <span className="block text-[14px] font-[650]">{copy.addressLine}</span>
+            <input name="addressLine" value={values.addressLine} maxLength={160} onChange={(event) => change('addressLine', event.target.value)} className={input} />
+            {fieldError('addressLine')}
+          </label>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <label className="block">
+              <span className="block text-[14px] font-[650]">{copy.locality}</span>
+              <input name="locality" value={values.locality} maxLength={80} onChange={(event) => change('locality', event.target.value)} className={input} />
+              {fieldError('locality')}
+            </label>
+            <label className="block">
+              <span className="block text-[14px] font-[650]">{copy.pin}</span>
+              <input
+                name="pin"
+                value={values.pin}
+                inputMode="numeric"
+                autoComplete="postal-code"
+                maxLength={7}
+                onChange={(event) => change('pin', event.target.value)}
+                aria-invalid={errors.pin !== undefined}
+                aria-describedby={errors.pin !== undefined ? 'pin-error' : undefined}
+                className={input}
+              />
+              {fieldError('pin')}
+            </label>
           </div>
-        </fieldset>
-      </Card>
 
-      <Card className="space-y-4 p-4">
-        <h2 className="text-[18px] font-[650]">{copy.sectionAccess}</h2>
-        <TriState
-          legend={copy.stepFree}
-          name="stepFreeEntry"
-          value={values.accessibility.stepFreeEntry}
-          copy={copy}
-          onChange={(value) => change('accessibility', { ...latest.current.accessibility, stepFreeEntry: value })}
-        />
-        <TriState
-          legend={copy.accessibleToilet}
-          name="accessibleToilet"
-          value={values.accessibility.accessibleToilet}
-          copy={copy}
-          onChange={(value) => change('accessibility', { ...latest.current.accessibility, accessibleToilet: value })}
-        />
-        <label className="block">
-          <span className="block text-[14px] font-[650]">{copy.accessNote}</span>
-          <input
-            name="accessNote"
-            value={values.accessibility.note}
-            maxLength={200}
-            onChange={(event) => change('accessibility', { ...latest.current.accessibility, note: event.target.value })}
-            className={input}
+          <PinPicker
+            lat={Number(values.lat)}
+            lng={Number(values.lng)}
+            label={copy.sectionLocation}
+            onPick={(point) => {
+              setValues((previous) => ({ ...previous, lat: String(point.lat), lng: String(point.lng) }));
+              latest.current = { ...latest.current, lat: String(point.lat), lng: String(point.lng) };
+              dirty.current.add('location');
+              void flush();
+            }}
           />
-        </label>
-        {fieldError('accessibility')}
-      </Card>
+          <p id="location-help" className="text-[13px] text-text-secondary">
+            {copy.locationHelp}
+          </p>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <label className="block">
+              <span className="block text-[14px] font-[650]">{copy.latitude}</span>
+              <input name="lat" value={values.lat} inputMode="decimal" onChange={(event) => change('lat', event.target.value, 'location')} aria-describedby="location-help" className={input} />
+            </label>
+            <label className="block">
+              <span className="block text-[14px] font-[650]">{copy.longitude}</span>
+              <input name="lng" value={values.lng} inputMode="decimal" onChange={(event) => change('lng', event.target.value, 'location')} aria-describedby="location-help" className={input} />
+            </label>
+          </div>
+          {fieldError('location')}
+        </Card>
 
-      <Button
-        onClick={() =>
-          void (async () => {
-            await flush();
-            router.push(nextHref);
-          })()
-        }
-      >
-        {copy.continueToEvidence}
-      </Button>
+        <Card className="space-y-4 p-4">
+          <h2 className="text-[18px] font-[650]">{copy.sectionContact}</h2>
+          <label className="block">
+            <span className="block text-[14px] font-[650]">{copy.phone}</span>
+            <input
+              name="phone"
+              type="tel"
+              autoComplete="tel"
+              value={values.phone}
+              onChange={(event) => change('phone', event.target.value)}
+              aria-invalid={errors.phone !== undefined}
+              aria-describedby={errors.phone !== undefined ? 'phone-error' : undefined}
+              className={input}
+            />
+            {fieldError('phone')}
+          </label>
+          <label className="block">
+            <span className="block text-[14px] font-[650]">{copy.ownerName}</span>
+            <input name="ownerName" autoComplete="name" value={values.ownerName} maxLength={80} onChange={(event) => change('ownerName', event.target.value)} className={input} />
+            {fieldError('ownerName')}
+          </label>
+        </Card>
+
+        <Card className="p-4">
+          <h2 className="text-[18px] font-[650]">{copy.sectionHours}</h2>
+          <HoursEditor hours={values.hours} dayLabels={DAY_LABEL[locale] ?? DAY_LABEL['en-IN']} copy={copy} onChange={setDay} />
+          {fieldError('hours')}
+        </Card>
+
+        <Card className="space-y-4 p-4">
+          <h2 className="text-[18px] font-[650]">{copy.sectionOffer}</h2>
+          <label className="block">
+            <span className="block text-[14px] font-[650]">{copy.priceBand}</span>
+            <select
+              name="priceBand"
+              value={values.priceBand ?? ''}
+              onChange={(event) => change('priceBand', event.target.value === '' ? null : Number(event.target.value))}
+              className={input}
+            >
+              <option value="">{copy.priceBandNone}</option>
+              {[1, 2, 3, 4].map((band) => (
+                <option key={band} value={band}>
+                  {PRICE_LABEL[band]}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="block">
+            <span className="block text-[14px] font-[650]">{copy.services}</span>
+            <input name="services" value={values.services} onChange={(event) => change('services', event.target.value)} aria-describedby="services-help" className={input} />
+            <span id="services-help" className="mt-1 block text-[13px] text-text-secondary">
+              {copy.servicesHelp}
+            </span>
+            {fieldError('services')}
+          </label>
+          <fieldset>
+            <legend className="text-[14px] font-[650]">{copy.payments}</legend>
+            <div className="mt-1 flex flex-wrap gap-2">
+              {Object.entries(PAYMENT_LABEL).map(([method, label]) => (
+                <label key={method} className="flex min-h-[44px] items-center gap-2 rounded-xl border border-border-subtle px-3 text-[14px]">
+                  <input
+                    type="checkbox"
+                    checked={values.paymentMethods.includes(method)}
+                    onChange={(event) =>
+                      change(
+                        'paymentMethods',
+                        event.target.checked
+                          ? [...latest.current.paymentMethods, method]
+                          : latest.current.paymentMethods.filter((item) => item !== method),
+                      )
+                    }
+                  />
+                  {label}
+                </label>
+              ))}
+            </div>
+          </fieldset>
+        </Card>
+
+        <Card className="space-y-4 p-4">
+          <h2 className="text-[18px] font-[650]">{copy.sectionAccess}</h2>
+          <TriState
+            legend={copy.stepFree}
+            name="stepFreeEntry"
+            value={values.accessibility.stepFreeEntry}
+            copy={copy}
+            onChange={(value) => change('accessibility', { ...latest.current.accessibility, stepFreeEntry: value })}
+          />
+          <TriState
+            legend={copy.accessibleToilet}
+            name="accessibleToilet"
+            value={values.accessibility.accessibleToilet}
+            copy={copy}
+            onChange={(value) => change('accessibility', { ...latest.current.accessibility, accessibleToilet: value })}
+          />
+          <label className="block">
+            <span className="block text-[14px] font-[650]">{copy.accessNote}</span>
+            <input
+              name="accessNote"
+              value={values.accessibility.note}
+              maxLength={200}
+              onChange={(event) => change('accessibility', { ...latest.current.accessibility, note: event.target.value })}
+              className={input}
+            />
+          </label>
+          {fieldError('accessibility')}
+        </Card>
+
+        <Button
+          onClick={() =>
+            void (async () => {
+              await flush();
+              // A full navigation: the next step renders from what was just saved.
+              window.location.assign(nextHref);
+            })()
+          }
+        >
+          {copy.continueToEvidence}
+        </Button>
+      </fieldset>
     </div>
   );
+}
+
+/** False during the server render and before hydration, true after. */
+export function useHydrated(): boolean {
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => setHydrated(true), []);
+  return hydrated;
 }
 
 export function HoursEditor({

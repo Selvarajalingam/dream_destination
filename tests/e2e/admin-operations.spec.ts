@@ -122,7 +122,8 @@ test('a traveller report reaches the triage queue', async ({ page }) => {
     .getByRole('textbox', { name: /what did you see/i })
     .fill(`A fallen tree blocks the forest road two kilometres past the gate (${marker}).`);
   await page.getByRole('button', { name: /send report/i }).click();
-  await expect(page.getByRole('status')).toContainText(/report sent/i);
+  // Filtered: the page has other live regions, such as the add-to-trip outcome.
+  await expect(page.getByRole('status').filter({ hasText: /report sent/i })).toBeVisible();
 
   await signIn(page, 'admin');
   await page.goto('/admin/incidents');

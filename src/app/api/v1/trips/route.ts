@@ -54,8 +54,12 @@ export const POST = route(
   },
 );
 
-export const GET = route({ auth: 'session' }, async ({ session }) => {
-  const trips = await tripsRepository.listForUser(session.userId!);
+/**
+ * GET /api/v1/trips — the caller's own trips. A guest who has planned one
+ * sees it too, so "Add to trip" works before signing in.
+ */
+export const GET = route({ auth: 'none' }, async ({ session }) => {
+  const trips = session.userId === null ? [] : await tripsRepository.listForUser(session.userId);
   return json({ trips });
 });
 

@@ -257,11 +257,18 @@ export const tripsRepository = {
     }) as Promise<number | null>;
   },
 
-  async setItemLocked(itemId: string, locked: boolean): Promise<void> {
-    await sql`
-      UPDATE itinerary_items SET locked_by_user = ${locked}, updated_at = now()
-      WHERE id = ${itemId}
+  /**
+   * Scoped to the trip: owning one trip must not let a caller lock an item in
+   * another by guessing its id. Returns false when the item is not in it.
+   */
+  async setItemLocked(tripId: string, itemId: string, locked: boolean): Promise<boolean> {
+    const rows = await sql`
+      UPDATE itinerary_items i SET locked_by_user = ${locked}, updated_at = now()
+      FROM itinerary_days d
+      WHERE i.id = ${itemId} AND d.id = i.itinerary_day_id AND d.trip_id = ${tripId}
+      RETURNING i.id
     `;
+    return rows.length === 1;
   },
 
   async setItemStart(itemId: string, startsAt: Date | null): Promise<void> {
@@ -271,8 +278,54 @@ export const tripsRepository = {
     `;
   },
 
-  async deleteItem(itemId: string): Promise<void> {
-    await sql`DELETE FROM itinerary_items WHERE id = ${itemId}`;
+  async setItemTravel(itemId: string, leg: { minutes: number; meters: number; mode: string }): Promise<void> {
+    await sql`
+      UPDATE itinerary_items SET travel_from_previous = ${sql.json(leg)}, updated_at = now()
+      WHERE id = ${itemId}
+    `;
+  },
+
+  /** Scoped to the trip, as setItemLocked. Returns the item's day, or null. */
+  async deleteItem(tripId: string, itemId: string): Promise<string | null> {
+    const [row] = await sql<{ dayId: string }[]>`
+      DELETE FROM itinerary_items i
+      USING itinerary_days d
+      WHERE i.id = ${itemId} AND d.id = i.itinerary_day_id AND d.trip_id = ${tripId}
+      RETURNING i.itinerary_day_id AS "dayId"
+    `;
+    return row?.dayId ?? null;
+  },
+
+  /** Inserts at a position in the day, moving later items down one. */
+  async insertItemAt(tripId: string, dayId: string, index: number, item: NewItem): Promise<string> {
+    return sql.begin(async (tx) => {
+      const [day] = await tx<{ id: string }[]>`SELECT id FROM itinerary_days WHERE id = ${dayId} AND trip_id = ${tripId}`;
+      if (day === undefined) throw new Error('That day is not part of this trip.');
+
+      // Two steps, because (day, sort_order) is unique and checked row by row:
+      // shifting in place would collide with the next item mid-statement.
+      await tx`
+        UPDATE itinerary_items SET sort_order = -(sort_order + 1)
+        WHERE itinerary_day_id = ${dayId} AND sort_order >= ${index}
+      `;
+      await tx`
+        UPDATE itinerary_items SET sort_order = -sort_order
+        WHERE itinerary_day_id = ${dayId} AND sort_order < 0
+      `;
+      const [row] = await tx<{ id: string }[]>`
+        INSERT INTO itinerary_items (
+          itinerary_day_id, place_id, local_business_id, item_type, title,
+          starts_at, duration_minutes, sort_order, travel_from_previous, price_estimate, notes
+        ) VALUES (
+          ${dayId}, ${item.placeId ?? null}, ${item.localBusinessId ?? null},
+          ${item.itemType}, ${item.title}, ${item.startsAt}, ${item.durationMinutes},
+          ${index}, ${tx.json(item.travelFromPrevious)}, ${tx.json(item.priceEstimate)}, ${item.notes ?? null}
+        )
+        RETURNING id
+      `;
+      await tx`UPDATE trips SET version = version + 1, updated_at = now() WHERE id = ${tripId}`;
+      return row.id;
+    }) as Promise<string>;
   },
 
   async appendItem(dayId: string, item: NewItem): Promise<string> {

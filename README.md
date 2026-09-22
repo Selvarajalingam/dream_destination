@@ -76,9 +76,9 @@ npm run verify    # typecheck, unit, integration, end-to-end
 
 | Suite | Count | What it covers |
 |---|---:|---|
-| Unit | 292 | Dream Score, budget, crowd precedence and expiry, trip state, itinerary scheduling, conflicts, verification gating, brief parsing, tool allowlist, components, circuit breaker, dependency rule, operations urgency, freshness, incident rules and redaction, business review, event catalogue, fairness, owner listing rules, upload checks, owner dashboard |
-| Integration | 150 | Real PostGIS queries, seed volumes, object-level authorization, itinerary generation, shortlist persistence, incident suspension, re-verification without bulk approval, business and sponsorship decisions, analytics capture, the owner flow from draft to approval and change review |
-| End-to-end | 125 | The full demonstration journey, accessibility across the traveller, operations and owner screens, provider degradation, and file access rules |
+| Unit | 303 | Dream Score, budget, crowd precedence and expiry, trip state, itinerary scheduling, conflicts, verification gating, brief parsing, tool allowlist, components, circuit breaker, dependency rule, operations urgency, freshness, incident rules and redaction, business review, event catalogue, fairness, owner listing rules, upload checks, owner dashboard, slot finding for an added stop |
+| Integration | 156 | Real PostGIS queries, seed volumes, object-level authorization, itinerary generation, shortlist persistence, incident suspension, re-verification without bulk approval, business and sponsorship decisions, analytics capture, the owner flow from draft to approval and change review, adding a stop to a plan, item changes scoped to their trip |
+| End-to-end | 129 | The full demonstration journey, accessibility across the traveller, operations and owner screens, provider degradation, file access rules, and adding a business to a plan with undo |
 
 Integration and end-to-end tests need the database running. The integration
 suite reseeds once before it starts, because several fixtures are relative to

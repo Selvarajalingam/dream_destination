@@ -53,16 +53,19 @@ export const PATCH = route({ auth: 'none', body: BodySchema }, async ({ params, 
 
   switch (body.action) {
     case 'lock': {
-      await tripsRepository.setItemLocked(body.itemId, body.locked);
+      if (!(await tripsRepository.setItemLocked(params.id, body.itemId, body.locked))) throw problems.notFound();
       await tripsRepository.bumpVersion(params.id);
       break;
     }
 
     case 'remove': {
-      await tripsRepository.deleteItem(body.itemId);
+      // Also the undo for an added stop (E10-S04).
+      const dayId = await tripsRepository.deleteItem(params.id, body.itemId);
+      if (dayId === null) throw problems.notFound();
       await tripsRepository.bumpVersion(params.id);
-      // Removing a stop changes the budget, so rebuild it rather than letting
-      // the totals drift from the plan.
+      // The rest of the day moves up, and the budget follows the plan rather
+      // than drifting from it.
+      await tripsService.rescheduleDay(params.id, dayId);
       await tripsService.rebuildBudget(params.id, trip.tripBrief as never);
       break;
     }

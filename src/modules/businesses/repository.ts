@@ -156,6 +156,18 @@ export const businessRepository = {
     `;
   },
 
+  /**
+   * Locations of listings already in a plan, whatever their status now, so a
+   * later closure or suspension does not break travel times for the day.
+   */
+  async findPointsByIds(ids: string[]): Promise<Array<{ id: string; lat: number; lng: number }>> {
+    if (ids.length === 0) return [];
+    return sql<Array<{ id: string; lat: number; lng: number }>>`
+      SELECT id, ST_Y(location::geometry) AS lat, ST_X(location::geometry) AS lng
+      FROM local_businesses WHERE id IN ${sql(ids)}
+    `;
+  },
+
   /** Counted for the impact analytics screen. */
   async countActive(): Promise<number> {
     const [row] = await sql<{ count: string }[]>`

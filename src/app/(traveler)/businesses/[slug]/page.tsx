@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import { businessRepository } from '@/modules/businesses/repository';
-import { Button } from '@/components/ui/primitives';
+import { AddToTrip } from '@/components/patterns/AddToTrip';
 import { BusinessListingView } from '@/components/patterns/BusinessListingView';
 import { ReportConcern } from '@/components/patterns/ReportConcern';
 import { trackPage } from '@/server/track-page';
@@ -49,7 +49,7 @@ export default async function BusinessPage({ params }: { params: Promise<{ slug:
       }}
       actions={
         <>
-          <Button>Add to itinerary</Button>
+          <AddToTrip kind="business" targetId={business.id} label="Add to itinerary" />
           {business.phone !== null && (
             <TrackedLink
               event="business_contact"

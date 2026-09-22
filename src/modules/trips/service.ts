@@ -9,6 +9,7 @@ import { DomainError } from '@/shared/result';
 import { PILOT_TIMEZONE, addMinutes } from '@/shared/time';
 import { haversineMeters } from '@/shared/geo';
 import { detectConflicts } from './domain/conflicts';
+import { REFUSAL_MESSAGE, findSlot, type DayPlan, type Slot } from './domain/insertion';
 import { recalculateSchedule } from './domain/itinerary';
 import { assertTransition } from './domain/trip-state';
 import type {
@@ -483,30 +484,27 @@ export const tripsService = {
     await tripsRepository.replaceBudget(tripId, totalLimitMinor, reserveMinor, fitToBudget(lines, totalLimitMinor - reserveMinor));
   },
 
-  /** Recomputes start times after a reorder, honouring locked items. */
+  /** Recomputes start times and travel legs after a change, honouring locked items. */
   async rescheduleDay(tripId: string, dayId: string): Promise<void> {
     const days = await tripsRepository.listDays(tripId);
     const day = days.find((candidate) => candidate.id === dayId);
     if (day === undefined) return;
 
-    const places = await catalogRepository.findPlacesByIds(
-      day.items.map((item) => item.placeId).filter((id): id is string => id !== null),
-    );
-    const byId = new Map(places.map((place) => [place.id, place]));
+    const points = await pointsFor(day.items);
     const maps = getMapsProvider();
 
     // Pre-compute the legs, since recalculateSchedule is synchronous.
     const legs = new Map<string, { minutes: number; meters: number; mode: 'car' }>();
     for (let index = 1; index < day.items.length; index += 1) {
-      const from = byId.get(day.items[index - 1].placeId ?? '');
-      const to = byId.get(day.items[index].placeId ?? '');
+      const from = points.get(day.items[index - 1].id);
+      const to = points.get(day.items[index].id);
 
       if (from === undefined || to === undefined) {
         legs.set(day.items[index].id, { minutes: 15, meters: 5_000, mode: 'car' });
         continue;
       }
 
-      const route = await maps.route({ lat: from.lat, lng: from.lng }, { lat: to.lat, lng: to.lng }, 'car');
+      const route = await maps.route(from, to, 'car');
       legs.set(day.items[index].id, { minutes: route.minutes, meters: route.meters, mode: 'car' });
     }
 
@@ -518,7 +516,73 @@ export const tripsService = {
 
     for (const item of scheduled) {
       await tripsRepository.setItemStart(item.id, item.startsAt);
+      await tripsRepository.setItemTravel(item.id, item.travelFromPrevious);
     }
+  },
+
+  /**
+   * Adds one place or local business to a plan at the feasible slot that
+   * bends the plan least (E10-S04, T10). Travel legs and the budget are
+   * rebuilt afterwards; the returned item id is what an undo removes.
+   */
+  async addStop(
+    tripId: string,
+    target: { kind: 'place' | 'business'; id: string },
+    options: { dayId?: string } = {},
+  ): Promise<{ itemId: string; slot: Slot; detail: TripDetail }> {
+    const trip = await tripsRepository.findById(tripId);
+    if (trip === null) throw new DomainError('trip.not_found', 'That trip does not exist.', 404);
+    const brief = trip.tripBrief as TripBrief;
+
+    const days = await tripsRepository.listDays(tripId);
+    if (days.length === 0) throw new DomainError('trip.no_itinerary', 'Generate a plan for this trip first.', 409);
+
+    const already = days.find((day) =>
+      day.items.some((item) => (target.kind === 'place' ? item.placeId : item.localBusinessId) === target.id),
+    );
+    if (already !== undefined) {
+      throw new DomainError('trip.already_planned', `It is already in this plan, on day ${already.dayNumber}.`, 409);
+    }
+
+    const candidate = await stopFor(target);
+    const points = await pointsFor(days.flatMap((day) => day.items));
+
+    const plans: DayPlan[] = days.map((day) => {
+      const start = day.date === null ? dayStartUtc(new Date()) : dayStartUtc(day.date);
+      return {
+        dayId: day.id,
+        dayNumber: day.dayNumber,
+        dayStart: start,
+        isoDate: new Date(start.getTime() + 330 * 60_000).toISOString().slice(0, 10),
+        stops: day.items.map((item) => ({
+          id: item.id,
+          point: points.get(item.id) ?? null,
+          startsAt: item.startsAt,
+          durationMinutes: item.durationMinutes,
+          lockedByUser: item.lockedByUser,
+        })),
+      };
+    });
+
+    const found = findSlot(plans, candidate.stop, {
+      dayMinutes: DAY_BUDGET_MINUTES[brief.pace ?? 'balanced'] ?? DAY_BUDGET_MINUTES.balanced,
+      travel: estimateTravelMinutes,
+      onlyDayId: options.dayId,
+    });
+    if ('refusal' in found) throw new DomainError(`trip.no_slot.${found.refusal}`, REFUSAL_MESSAGE[found.refusal], 409);
+
+    const itemId = await tripsRepository.insertItemAt(tripId, found.slot.dayId, found.slot.index, {
+      ...candidate.item,
+      startsAt: found.slot.startsAt,
+      sortOrder: found.slot.index,
+    });
+
+    await this.rescheduleDay(tripId, found.slot.dayId);
+    await this.rebuildBudget(tripId, brief);
+
+    const detail = await this.getDetail(tripId);
+    if (detail === null) throw new DomainError('trip.not_found', 'That trip does not exist.', 404);
+    return { itemId, slot: found.slot, detail };
   },
 
   async setStatus(tripId: string, next: TripStatus): Promise<void> {
@@ -608,3 +672,79 @@ function isOpenAt(place: PlaceRow, at: Date): boolean {
 }
 
 export type { ItineraryItem };
+
+/** The same straight-line estimate the haversine adapter uses, synchronously. */
+function estimateTravelMinutes(from: { lat: number; lng: number } | null, to: { lat: number; lng: number } | null): number {
+  if (from === null || to === null) return 15;
+  return Math.round(((haversineMeters(from, to) * 1.45) / 1000 / 34) * 60);
+}
+
+/** Where each item in a plan is, for places and businesses alike. */
+async function pointsFor(items: readonly ItineraryItem[]): Promise<Map<string, { lat: number; lng: number }>> {
+  const placeIds = items.map((item) => item.placeId).filter((id): id is string => id !== null);
+  const businessIds = items.map((item) => item.localBusinessId).filter((id): id is string => id !== null);
+  const [places, businesses] = await Promise.all([
+    catalogRepository.findPlacesByIds(placeIds),
+    businessRepository.findPointsByIds(businessIds),
+  ]);
+  const placeById = new Map(places.map((place) => [place.id, { lat: place.lat, lng: place.lng }]));
+  const businessById = new Map(businesses.map((business) => [business.id, { lat: business.lat, lng: business.lng }]));
+
+  const points = new Map<string, { lat: number; lng: number }>();
+  for (const item of items) {
+    const point =
+      (item.placeId !== null ? placeById.get(item.placeId) : undefined) ??
+      (item.localBusinessId !== null ? businessById.get(item.localBusinessId) : undefined);
+    if (point !== undefined) points.set(item.id, point);
+  }
+  return points;
+}
+
+/** Categories where spending is up to the traveller, so no cost is assumed. */
+const UNPRICED_BUSINESS_CATEGORIES = new Set(['shop', 'artisan']);
+
+/** What an added stop looks like in the plan, and what the slot search needs. */
+async function stopFor(target: { kind: 'place' | 'business'; id: string }) {
+  if (target.kind === 'place') {
+    const place = await catalogRepository.findPlaceById(target.id);
+    if (place === null) throw new DomainError('trip.stop_not_found', 'That place is not available.', 404);
+    const price = priceOf(place);
+    const durationMinutes = place.expectedVisitMinutes ?? 60;
+    return {
+      stop: { point: { lat: place.lat, lng: place.lng }, durationMinutes, hours: place.operatingHours, closure: null },
+      item: {
+        placeId: place.id,
+        itemType: 'place' as const,
+        title: place.name,
+        durationMinutes,
+        travelFromPrevious: { minutes: 0, meters: 0, mode: 'car' as const },
+        priceEstimate: { ...price, priceState: 'historical' as PriceState },
+      },
+    };
+  }
+
+  const business = await businessRepository.findById(target.id);
+  if (business === null) throw new DomainError('trip.stop_not_found', 'That business is not available.', 404);
+  const meal = MEAL_CATEGORIES.has(business.category);
+  const band = business.priceBand ?? 2;
+  const free = UNPRICED_BUSINESS_CATEGORIES.has(business.category);
+  const durationMinutes = meal ? MEAL_DURATION_MINUTES : 45;
+  return {
+    stop: {
+      point: { lat: business.lat, lng: business.lng },
+      durationMinutes,
+      hours: business.operatingHours,
+      closure: business.temporaryClosure,
+    },
+    item: {
+      localBusinessId: business.id,
+      itemType: meal ? ('meal' as const) : ('business' as const),
+      title: business.name,
+      durationMinutes,
+      travelFromPrevious: { minutes: 0, meters: 0, mode: 'car' as const },
+      priceEstimate: free
+        ? { lowMinor: 0, expectedMinor: 0, highMinor: 0, priceState: 'historical' as PriceState }
+        : { lowMinor: band * 20_000, expectedMinor: band * 30_000, highMinor: band * 45_000, priceState: 'historical' as PriceState },
+    },
+  };
+}
