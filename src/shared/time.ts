@@ -64,3 +64,8 @@ export function formatAge(observedAt: Date, now: Date): string {
 export function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
 }
+
+/** Today as an ISO date in India, where every listing and trip is. */
+export function todayInIndia(now = new Date()): string {
+  return new Date(now.getTime() + 5.5 * 3_600_000).toISOString().slice(0, 10);
+}

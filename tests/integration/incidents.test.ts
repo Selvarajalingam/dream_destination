@@ -54,7 +54,7 @@ describe('incident queue (A06)', () => {
 
   it('shows an owner response on the business report that has one', async () => {
     const rows = await incidentsRepository.list();
-    const business = rows.find((row) => row.entityType === 'business');
+    const business = rows.find((row) => row.entityType === 'business' && row.hasOwnerResponse);
     const detail = await incidentsRepository.findById(business!.id);
     expect(detail!.ownerResponse).toMatch(/close an hour early on Mondays/);
   });

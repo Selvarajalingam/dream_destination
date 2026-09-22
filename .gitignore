@@ -11,3 +11,6 @@ test-results/
 .vercel
 test-results/
 .playwright-mcp/
+
+# Owner uploads in local development (src/platform/storage)
+var/

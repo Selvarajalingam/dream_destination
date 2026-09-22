@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   BUSINESS_CHECKS,
   approvalBlockers,
+  appliesPendingChange,
   canReviewBusiness,
   listingStatusAfter,
   sponsorshipBlocker,
@@ -85,5 +86,19 @@ describe('listingStatusAfter', () => {
     expect(listingStatusAfter('approved')).toBe('active');
     expect(listingStatusAfter('changes_requested')).toBe('pending');
     expect(listingStatusAfter('rejected')).toBe('rejected');
+  });
+});
+
+describe('sensitive changes to a live listing (B06)', () => {
+  it('never changes the listing status, whatever the decision', () => {
+    for (const decision of ['approved', 'changes_requested', 'rejected'] as const) {
+      expect(listingStatusAfter(decision, 'sensitive_change', 'active')).toBe('active');
+    }
+  });
+
+  it('writes the held change only on approval', () => {
+    expect(appliesPendingChange('approved', 'sensitive_change')).toBe(true);
+    expect(appliesPendingChange('rejected', 'sensitive_change')).toBe(false);
+    expect(appliesPendingChange('approved', 'listing')).toBe(false);
   });
 });

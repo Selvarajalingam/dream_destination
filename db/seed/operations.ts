@@ -53,6 +53,15 @@ const INCIDENTS: IncidentSeed[] = [
       'We close an hour early on Mondays for stock delivery. Updating the listed hours now; sorry for the wasted trip.',
   },
   {
+    // Waiting for the demo owner to answer it from B05.
+    entityType: 'business',
+    slug: 'badaga-home-kitchen',
+    category: 'information',
+    severity: 'low',
+    description: 'The listing mentions ragi mudde but it was not on the menu on Saturday lunchtime.',
+    hoursAgo: 26,
+  },
+  {
     entityType: 'place',
     slug: 'monkey-falls',
     category: 'crowding',

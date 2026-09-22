@@ -47,6 +47,7 @@ const TABLES_TO_CLEAR = [
   'story_content',
   'rule_content',
   'business_verifications',
+  'business_files',
   'local_businesses',
   'verification_evidence',
   'hidden_gem_verifications',

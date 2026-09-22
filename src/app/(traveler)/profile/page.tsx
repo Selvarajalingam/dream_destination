@@ -1,5 +1,5 @@
 import { getSession } from '@/server/session';
-import { isAdmin } from '@/server/authorize';
+import { hasRole, isAdmin } from '@/server/authorize';
 import { DemoSignIn } from './DemoSignIn';
 
 /**
@@ -29,7 +29,10 @@ export default async function ProfilePage() {
               : `Signed in with ${session.roles.length === 0 ? 'no roles' : session.roles.join(', ')}.`}
         </p>
 
-        <DemoSignIn isAdmin={session !== null && isAdmin(session)} />
+        <DemoSignIn
+          isAdmin={session !== null && isAdmin(session)}
+          isOwner={session !== null && hasRole(session, 'business_owner')}
+        />
       </section>
 
       <section className="mt-6">

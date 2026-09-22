@@ -55,12 +55,14 @@ export const businessReviewService = {
       }
     }
 
-    const status = listingStatusAfter(input.decision);
+    const status = listingStatusAfter(input.decision, detail.requestKind, detail.status);
 
     await businessReviewRepository.decideListing({
       businessId: detail.businessId,
       verificationId: detail.verificationId,
       decision: input.decision,
+      requestKind: detail.requestKind,
+      pendingChange: detail.pendingChange,
       status,
       reviewerUserId: input.reviewer.userId,
       reason: input.reason,
@@ -69,11 +71,17 @@ export const businessReviewService = {
 
     await recordAudit({
       actorUserId: input.reviewer.userId,
-      action: `business_listing.${input.decision}`,
+      action: detail.requestKind === 'sensitive_change' ? `business_change.${input.decision}` : `business_listing.${input.decision}`,
       entityType: 'business',
       entityId: detail.businessId,
       beforeState: { status: detail.status, verification: detail.verificationStatus },
-      afterState: { status, verification: input.decision, reason: input.reason, confirmedChecks: input.confirmedChecks },
+      afterState: {
+        status,
+        verification: input.decision,
+        reason: input.reason,
+        confirmedChecks: input.confirmedChecks,
+        ...(detail.requestKind === 'sensitive_change' ? { change: detail.pendingChange } : {}),
+      },
       requestId: input.requestId,
     });
   },

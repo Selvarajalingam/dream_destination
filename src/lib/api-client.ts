@@ -63,6 +63,23 @@ export const api = {
 
   patch: <T,>(path: string, body: unknown): Promise<T> =>
     request<T>(path, { method: 'PATCH', body: JSON.stringify(body) }),
+
+  put: <T,>(path: string, body: unknown): Promise<T> =>
+    request<T>(path, { method: 'PUT', body: JSON.stringify(body) }),
+
+  delete: <T,>(path: string): Promise<T> => request<T>(path, { method: 'DELETE' }),
+
+  /** Multipart upload. The browser sets the boundary, so no content type here. */
+  upload: async <T,>(path: string, form: FormData): Promise<T> => {
+    const response = await fetch(path, { method: 'POST', body: form, headers: { 'x-csrf-token': csrfToken() } });
+    if (!response.ok) {
+      const problem = (await response.json().catch(() => null)) as Problem | null;
+      throw new ApiProblemError(
+        problem ?? { type: 'about:blank', title: 'Upload failed', status: response.status, requestId: 'unknown' },
+      );
+    }
+    return (await response.json()) as T;
+  },
 };
 
 /**

@@ -14,13 +14,15 @@ import { problems } from '@/server/problem';
  */
 
 const BodySchema = z.object({
-  role: z.enum(['traveler', 'verifier', 'admin']),
+  role: z.enum(['traveler', 'verifier', 'admin', 'owner']),
 });
 
 const EMAILS: Record<string, string> = {
   traveler: 'traveller@demo.dreamdestination.invalid',
   verifier: 'verifier@demo.dreamdestination.invalid',
   admin: 'admin@demo.dreamdestination.invalid',
+  // Owns Badaga Home Kitchen, which is live, and two listings in review.
+  owner: 'owner.kitchen@demo.dreamdestination.invalid',
 };
 
 export const POST = route({ auth: 'none', body: BodySchema }, async ({ body, request }) => {

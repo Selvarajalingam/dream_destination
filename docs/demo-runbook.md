@@ -175,6 +175,33 @@ travellers.
 Open that place as a traveller: the band changed, and tapping **Why?** shows
 your reason. It expires on its own; overrides never linger.
 
+### 12. A local business owner
+
+Go to **Profile** → sign in as **Business owner** → **Open your business
+listings**. This account owns Badaga Home Kitchen, which is live, and two
+listings that start in review.
+
+**Dashboard (B05).** Open Badaga Home Kitchen. A traveller report is waiting
+for a response; answer it, then find that response in the admin incident screen
+(A06). The activity figures are labelled as traveller actions, not sales, and
+Saves reads "Not measured" rather than zero.
+
+**Updates (B06).** **Update listing** → set a temporary closure for today. Open
+the listing as a traveller: it says it is closed, and it is gone from the
+destination's Support Local list. Remove the closure. Then change the name in
+the lower form: it asks for a reason and goes to A07 as a change request, and
+travellers keep seeing the reviewed name until it is approved.
+
+**Onboarding (B01–B04).** **Register a business**. Switch to தமிழ் and back.
+Start a listing; fields save as you type (reload to prove it), and a mistyped
+PIN is named without losing the rest. Upload evidence, open the preview, and
+send it for review. It then appears in the admin Businesses queue (A07).
+
+**Worth saying:** the preview is the traveller page itself, rendered by the
+same component. Evidence files are never shown to travellers and open only as
+downloads for the owner and reviewers, and the server reads each file's real
+type rather than trusting its name.
+
 ## Three failure modes worth showing
 
 The product is designed to degrade rather than break, and showing that is more

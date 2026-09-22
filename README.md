@@ -20,12 +20,18 @@ The PRD's required demonstration journey works end to end:
 | Area | Screens |
 |---|---|
 | Traveller | T01 Home, T03 Dream AI, T04 Shortlist, T06 Destination, T08 Budget, T09 Itinerary and map, T10 Place, T11 Verification, T12 Local business, T14 Trips, T16–T17 Trip Mode, T18 Nearby help, T19 Story, T20 Rules, T21 Offline pack, T23 Profile |
+| Business owner | B01 Onboarding start, B02 Details with autosave, B03 Verification evidence, B04 Listing preview, B05 Dashboard, B06 Updates, in English and Tamil |
 | Administration | A01 Operations overview, A02 Review queue, A03 Verification workspace, A04 Crowd operations, A05 Content freshness, A06 Incident triage, A07 Local business review, A08 Impact analytics |
 
-Out of scope for this build, and deferred deliberately: business owner screens
-B01–B06, the booking provider integration behind T13, web push delivery, the
-pgvector retrieval path for grounding, and the 50-prompt AI evaluation set from
-PRD Part II §8.6.
+Out of scope for this build, and deferred deliberately: the booking provider
+integration behind T13, web push delivery, the pgvector retrieval path for
+grounding, and the 50-prompt AI evaluation set from PRD Part II §8.6.
+
+The Tamil copy for the owner screens was written for this build and needs a
+native speaker's review before a pilot. Server messages, such as validation
+errors, are still English. Owner uploads are stored in `UPLOAD_DIR`, a local
+directory outside `public/`; a pilot deployment would put an object store
+behind the same interface in `src/platform/storage`.
 
 The analytics events, their properties and what each one may never carry are
 listed in [docs/analytics-data-dictionary.md](docs/analytics-data-dictionary.md).
@@ -70,9 +76,9 @@ npm run verify    # typecheck, unit, integration, end-to-end
 
 | Suite | Count | What it covers |
 |---|---:|---|
-| Unit | 249 | Dream Score, budget, crowd precedence and expiry, trip state, itinerary scheduling, conflicts, verification gating, brief parsing, tool allowlist, components, circuit breaker, dependency rule, operations urgency, freshness, incident rules and redaction, business review, event catalogue, fairness |
-| Integration | 136 | Real PostGIS queries, seed volumes, object-level authorization, itinerary generation, shortlist persistence, incident suspension, re-verification without bulk approval, business and sponsorship decisions, analytics capture |
-| End-to-end | 107 | The full demonstration journey, accessibility across sixteen pages, provider degradation, and the operations screens |
+| Unit | 292 | Dream Score, budget, crowd precedence and expiry, trip state, itinerary scheduling, conflicts, verification gating, brief parsing, tool allowlist, components, circuit breaker, dependency rule, operations urgency, freshness, incident rules and redaction, business review, event catalogue, fairness, owner listing rules, upload checks, owner dashboard |
+| Integration | 150 | Real PostGIS queries, seed volumes, object-level authorization, itinerary generation, shortlist persistence, incident suspension, re-verification without bulk approval, business and sponsorship decisions, analytics capture, the owner flow from draft to approval and change review |
+| End-to-end | 125 | The full demonstration journey, accessibility across the traveller, operations and owner screens, provider degradation, and file access rules |
 
 Integration and end-to-end tests need the database running. The integration
 suite reseeds once before it starts, because several fixtures are relative to
@@ -90,7 +96,7 @@ src/
   platform/       ai, maps, cache, db, resilience, observability adapters
   server/         sessions, CSRF, authorization, rate limits, problems
   components/     design system built on the PRD's tokens
-  app/            routes: (traveler), (admin), api/v1
+  app/            routes: (traveler), (business), (admin), api/v1
 db/
   migrations/     forward-only SQL, transcribed from PRD Part II §6
   seed/           the Coimbatore and Nilgiris demonstration dataset

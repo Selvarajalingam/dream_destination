@@ -28,12 +28,11 @@ const ALL_CHECKS = BUSINESS_CHECKS.map((check) => check.key);
 
 describe('business review queues (A07)', () => {
   it('lists the three seeded businesses awaiting verification', async () => {
+    // Contains rather than equals: the owner-flow tests submit listings too.
     const queue = await businessReviewRepository.verificationQueue();
-    expect(queue.map((row) => row.slug).sort()).toEqual([
-      'kotagiri-spice-trail-homestay',
-      'nilgiri-weavers-studio',
-      'ooty-lakeview-cafe',
-    ]);
+    expect(queue.map((row) => row.slug)).toEqual(
+      expect.arrayContaining(['kotagiri-spice-trail-homestay', 'nilgiri-weavers-studio', 'ooty-lakeview-cafe']),
+    );
   });
 
   it('keeps sponsorship requests in their own queue, marking which are verified', async () => {

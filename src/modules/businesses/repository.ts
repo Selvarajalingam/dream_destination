@@ -27,6 +27,13 @@ export type BusinessRow = {
   /** When the owner last confirmed these details. Rendered beside the hours. */
   lastOwnerUpdateAt: Date | null;
   ownerVerified: boolean;
+  /** Street, locality and PIN joined for display; null when none recorded. */
+  addressText: string | null;
+  services: string[];
+  temporaryClosure: { from: string; until: string; note: string | null } | null;
+  availabilityNote: string | null;
+  /** Photo file ids, served by the authorised files route. */
+  photoIds: string[];
   distanceMeters?: number;
 };
 
@@ -46,7 +53,28 @@ const BUSINESS_COLUMNS = sql`
     WHERE bv.business_id = b.id
       AND bv.status = 'approved'
       AND (bv.expires_at IS NULL OR bv.expires_at > now())
-  ) AS "ownerVerified"
+  ) AS "ownerVerified",
+  NULLIF(concat_ws(', ', NULLIF(b.address->>'line', ''), NULLIF(b.address->>'locality', ''), NULLIF(b.address->>'pin', '')), '') AS "addressText",
+  b.services,
+  b.temporary_closure AS "temporaryClosure",
+  b.availability_note AS "availabilityNote",
+  ARRAY(
+    SELECT f.id FROM business_files f
+    WHERE f.business_id = b.id AND f.purpose = 'photo'
+    ORDER BY f.created_at
+  ) AS "photoIds"
+`;
+
+/**
+ * A listing closed today by its owner (B06) is left out of suggestions. Its
+ * own page still opens, and says it is closed.
+ */
+const NOT_CLOSED_TODAY = sql`
+  NOT (
+    b.temporary_closure IS NOT NULL
+    AND (b.temporary_closure->>'from')::date <= (now() AT TIME ZONE 'Asia/Kolkata')::date
+    AND (b.temporary_closure->>'until')::date >= (now() AT TIME ZONE 'Asia/Kolkata')::date
+  )
 `;
 
 export type BusinessFilter = {
@@ -68,6 +96,7 @@ export const businessRepository = {
         ST_Distance(b.location, ST_SetSRID(ST_MakePoint(${point.lng}, ${point.lat}), 4326)::geography) AS "distanceMeters"
       FROM local_businesses b
       WHERE b.status = 'active'
+        AND ${NOT_CLOSED_TODAY}
         AND ST_DWithin(b.location, ST_SetSRID(ST_MakePoint(${point.lng}, ${point.lat}), 4326)::geography, ${radiusMeters})
         ${categories === undefined || categories.length === 0 ? sql`` : sql`AND b.category = ANY(${sql.array(categories)})`}
         ${maxPriceBand === undefined ? sql`` : sql`AND (b.price_band IS NULL OR b.price_band <= ${maxPriceBand})`}
@@ -102,6 +131,7 @@ export const businessRepository = {
       FROM local_businesses b
       JOIN destinations d ON d.id = ${destinationId}
       WHERE b.status = 'active'
+        AND ${NOT_CLOSED_TODAY}
         AND ST_DWithin(b.location, d.center, 40000)
       ORDER BY "distanceMeters"
       LIMIT ${limit}
@@ -115,6 +145,7 @@ export const businessRepository = {
         0::float AS "distanceMeters"
       FROM local_businesses b
       WHERE b.status = 'active'
+        AND ${NOT_CLOSED_TODAY}
         AND EXISTS (
           SELECT 1 FROM itinerary_items ii
           JOIN itinerary_days dd ON dd.id = ii.itinerary_day_id

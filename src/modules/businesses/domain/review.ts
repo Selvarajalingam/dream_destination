@@ -63,9 +63,28 @@ export function sponsorshipBlocker(listing: {
   return null;
 }
 
-/** Listing status that results from each decision. */
-export function listingStatusAfter(decision: ListingDecision): 'active' | 'pending' | 'rejected' {
+export type RequestKind = 'listing' | 'sensitive_change';
+
+/**
+ * Listing status that results from each decision.
+ *
+ * A sensitive change to a live listing (B06) is decided on its own: declining
+ * it discards the change and leaves the listing exactly as it was, because
+ * the listing already passed review and a proposed edit is not a reason to
+ * hide it.
+ */
+export function listingStatusAfter(
+  decision: ListingDecision,
+  kind: RequestKind = 'listing',
+  currentStatus = 'pending',
+): string {
+  if (kind === 'sensitive_change') return currentStatus;
   if (decision === 'approved') return 'active';
   if (decision === 'rejected') return 'rejected';
   return 'pending';
+}
+
+/** Whether the held change is written to the listing. It is always cleared. */
+export function appliesPendingChange(decision: ListingDecision, kind: RequestKind): boolean {
+  return kind === 'sensitive_change' && decision === 'approved';
 }

@@ -1,5 +1,7 @@
 import { sql, withTransaction } from '@/platform/db/client';
-import type { BusinessCheck, ListingDecision } from './domain/review';
+import type { DraftPatch } from './domain/listing';
+import { appliesPendingChange, type BusinessCheck, type ListingDecision, type RequestKind } from './domain/review';
+import { ownerRepository } from './owner-repository';
 
 /**
  * Business review persistence for Screen A07.
@@ -51,6 +53,12 @@ export type BusinessReviewDetail = {
   sponsorshipDecidedAt: Date | null;
   sponsorshipDecisionReason: string | null;
   ownerVerified: boolean;
+  /** A first review, or a sensitive change to a live listing (B06). */
+  requestKind: RequestKind;
+  pendingChange: DraftPatch | null;
+  /** The owner's reason for a sensitive change, when there is one. */
+  ownerNote: string | null;
+  files: Array<{ id: string; purpose: 'photo' | 'evidence'; evidenceKind: string | null; originalName: string; contentType: string }>;
 };
 
 export const businessReviewRepository = {
@@ -86,7 +94,7 @@ export const businessReviewRepository = {
   },
 
   async findDetail(businessId: string): Promise<BusinessReviewDetail | null> {
-    const [row] = await sql<Array<Omit<BusinessReviewDetail, 'evidence'> & { evidence: Record<string, unknown> | null }>>`
+    const [row] = await sql<Array<Omit<BusinessReviewDetail, 'evidence' | 'ownerNote' | 'files'> & { evidence: Record<string, unknown> | null }>>`
       SELECT b.id AS "businessId",
              v.id AS "verificationId",
              b.name, b.slug, b.category, b.description,
@@ -104,6 +112,8 @@ export const businessReviewRepository = {
              b.sponsorship_requested_at AS "sponsorshipRequestedAt",
              b.sponsorship_decided_at AS "sponsorshipDecidedAt",
              b.sponsorship_decision_reason AS "sponsorshipDecisionReason",
+             COALESCE(v.request_kind, 'listing') AS "requestKind",
+             b.pending_change AS "pendingChange",
              EXISTS (
                SELECT 1 FROM business_verifications av
                WHERE av.business_id = b.id AND av.status = 'approved'
@@ -125,18 +135,31 @@ export const businessReviewRepository = {
     // Only the evidence text is shown; bookkeeping flags stay out of the view.
     const evidence: Record<string, string> = {};
     for (const [key, value] of Object.entries(row.evidence ?? {})) {
-      if (typeof value === 'string') evidence[key] = value;
+      if (typeof value === 'string' && key !== 'ownerNote') evidence[key] = value;
     }
+    const ownerNote = typeof row.evidence?.ownerNote === 'string' ? row.evidence.ownerNote : null;
 
-    return { ...row, evidence };
+    const files = await sql<BusinessReviewDetail['files']>`
+      SELECT id, purpose, evidence_kind AS "evidenceKind", original_name AS "originalName", content_type AS "contentType"
+      FROM business_files WHERE business_id = ${businessId}
+      ORDER BY purpose, created_at
+    `;
+
+    return { ...row, evidence, ownerNote, files };
   },
 
-  /** Records a listing decision and moves the listing to its new status. */
+  /**
+   * Records a listing decision and moves the listing to its new status. For a
+   * sensitive change, an approval writes the held change to the listing; any
+   * decision clears it.
+   */
   async decideListing(input: {
     businessId: string;
     verificationId: string;
     decision: ListingDecision;
-    status: 'active' | 'pending' | 'rejected';
+    requestKind: RequestKind;
+    pendingChange: DraftPatch | null;
+    status: string;
     reviewerUserId: string;
     reason: string;
     confirmedChecks: BusinessCheck[];
@@ -152,8 +175,14 @@ export const businessReviewRepository = {
             evidence_summary = evidence_summary || ${tx.json({ confirmedChecks: input.confirmedChecks })}
         WHERE id = ${input.verificationId}
       `;
+      if (appliesPendingChange(input.decision, input.requestKind) && input.pendingChange !== null) {
+        await ownerRepository.saveFields(input.businessId, input.pendingChange, { confirmsDetails: true }, tx);
+      }
       await tx`
-        UPDATE local_businesses SET status = ${input.status}, updated_at = now()
+        UPDATE local_businesses
+        SET status = ${input.status},
+            pending_change = ${input.requestKind === 'sensitive_change' ? null : tx`pending_change`},
+            updated_at = now()
         WHERE id = ${input.businessId}
       `;
     });

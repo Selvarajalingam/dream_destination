@@ -17,9 +17,10 @@ const ROLES = [
   { key: 'traveler', label: 'Traveller', detail: 'Plan trips and carry them offline' },
   { key: 'verifier', label: 'Verifier', detail: 'Review hidden-gem submissions' },
   { key: 'admin', label: 'Tourism admin', detail: 'Crowd overrides and verification decisions' },
+  { key: 'owner', label: 'Business owner', detail: 'Keep a local listing current and register a new one' },
 ] as const;
 
-export function DemoSignIn({ isAdmin }: { isAdmin: boolean }) {
+export function DemoSignIn({ isAdmin, isOwner }: { isAdmin: boolean; isOwner: boolean }) {
   const router = useRouter();
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -77,6 +78,16 @@ export function DemoSignIn({ isAdmin }: { isAdmin: boolean }) {
         <p role="alert" className="mt-3 text-[14px] font-[650] text-status-danger-text">
           {error}
         </p>
+      )}
+
+      {isOwner && (
+        <a
+          href="/business"
+          data-touch-target
+          className="mt-4 mr-2 inline-flex min-h-[44px] items-center rounded-xl bg-brand-primary px-4 text-[14px] font-[650] text-white"
+        >
+          Open your business listings
+        </a>
       )}
 
       {isAdmin && (

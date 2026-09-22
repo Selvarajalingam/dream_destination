@@ -43,6 +43,7 @@ export default async function BusinessReviewPage({ params }: { params: Promise<{
       <p className="mt-1 text-[14px] capitalize text-text-secondary">
         {detail.category.replace(/_/g, ' ')} · listing {detail.status} · verification{' '}
         {(detail.verificationStatus ?? 'none').replace(/_/g, ' ')}
+        {detail.requestKind === 'sensitive_change' && ' · change request'}
       </p>
 
       <div className="mt-5 grid gap-5 lg:grid-cols-2">
@@ -76,6 +77,54 @@ export default async function BusinessReviewPage({ params }: { params: Promise<{
               Check the address on a map
             </a>
           </Card>
+
+          {detail.requestKind === 'sensitive_change' && listingOpen && (
+            <Card className="border-status-warn/40 p-4" data-testid="requested-change">
+              <h2 className="text-[18px] font-[650]">Requested change to a live listing</h2>
+              <p className="mt-1 text-[14px] text-text-secondary">
+                Travellers see the current details until you decide. Declining discards the change and leaves the
+                listing live.
+              </p>
+              <ul className="mt-3 space-y-1 text-[14px]">
+                {Object.entries(detail.evidence)
+                  .filter(([, text]) => text.startsWith('Change '))
+                  .flatMap(([, text]) => text.split('; '))
+                  .map((line) => (
+                    <li key={line}>{line}</li>
+                  ))}
+              </ul>
+              {detail.ownerNote !== null && (
+                <p className="mt-3 rounded-xl bg-surface-subtle p-3 text-[14px]">
+                  <span className="font-[650]">Owner&apos;s reason: </span>
+                  {detail.ownerNote}
+                </p>
+              )}
+            </Card>
+          )}
+
+          {detail.files.length > 0 && (
+            <Card className="p-4" data-testid="submitted-files">
+              <h2 className="text-[18px] font-[650]">Uploaded files</h2>
+              <p className="mt-1 text-[14px] text-text-secondary">
+                Evidence opens as a download and is visible only to the owner and reviewers.
+              </p>
+              <ul className="mt-2 space-y-1 text-[14px]">
+                {detail.files.map((file) => (
+                  <li key={file.id} className="flex flex-wrap justify-between gap-2 border-t border-border-subtle pt-1">
+                    <span className="text-text-secondary">
+                      {file.purpose === 'photo' ? 'Photo' : file.evidenceKind === 'registration' ? 'Registration' : 'Address proof'}
+                    </span>
+                    <a
+                      href={`/api/v1/business/files/${file.id}`}
+                      className="font-[650] text-brand-primary underline underline-offset-2"
+                    >
+                      {file.originalName}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          )}
 
           {detail.decisionReason !== null && !listingOpen && (
             <Card className="p-4">
