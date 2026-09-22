@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { ownerCopy } from './business/copy';
 import { ownerContext } from './business/context';
 import { LocaleSwitch } from './business/LocaleSwitch';
+import { SignOutButton } from '@/components/SignOutButton';
 
 /**
  * Business owner shell — PRD Part I B01–B06.
@@ -49,6 +50,10 @@ export default async function BusinessLayout({ children }: { children: ReactNode
                 </Link>
               </nav>
               <LocaleSwitch locale={context.locale} label={copy.language} />
+              <SignOutButton
+                redirectTo="/business/login"
+                className="inline-flex min-h-[44px] items-center rounded-lg px-3 text-[14px] font-[650] hover:bg-surface-subtle"
+              />
             </div>
           )}
         </div>
@@ -60,7 +65,7 @@ export default async function BusinessLayout({ children }: { children: ReactNode
             <h1 className="text-[26px]">{copy.signInTitle}</h1>
             <p className="mt-2 text-[16px] text-text-secondary">{copy.signInBody}</p>
             <Link
-              href="/profile"
+              href="/business/login"
               data-touch-target
               className="mt-4 inline-flex min-h-[44px] items-center rounded-xl bg-brand-primary px-4 text-[14px] font-[650] text-white"
             >

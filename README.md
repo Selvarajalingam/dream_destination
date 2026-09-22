@@ -33,6 +33,24 @@ errors, are still English. Owner uploads are stored in `UPLOAD_DIR`, a local
 directory outside `public/`; a pilot deployment would put an object store
 behind the same interface in `src/platform/storage`.
 
+Sign-in has one page per audience: `/login` for travellers, `/business/login`
+for business owners and `/admin/login` for operations staff. Each accepts only
+its own kind of account and points anyone else to the right page. Passwords are
+stored as scrypt hashes, five wrong attempts lock an account for fifteen
+minutes, and every sign-in starts a fresh session. Outside production each page
+lists its demonstration accounts:
+
+| Page | Email | Password |
+|---|---|---|
+| `/login` | traveller@demo.dreamdestination.invalid | Traveller@2026 |
+| `/business/login` | owner.kitchen@demo.dreamdestination.invalid | Owner@2026 |
+| `/business/login` | owner.tea@demo.dreamdestination.invalid | Owner@2026 |
+| `/admin/login` | admin@demo.dreamdestination.invalid | Admin@2026 |
+| `/admin/login` | verifier@demo.dreamdestination.invalid | Verifier@2026 |
+
+There is no self-service registration or password reset yet; the pilot's
+identity provider is still an open decision (PRD Part II §20).
+
 The analytics events, their properties and what each one may never carry are
 listed in [docs/analytics-data-dictionary.md](docs/analytics-data-dictionary.md).
 A test keeps that document in step with the event catalogue. The A08 dashboard
@@ -76,9 +94,9 @@ npm run verify    # typecheck, unit, integration, end-to-end
 
 | Suite | Count | What it covers |
 |---|---:|---|
-| Unit | 303 | Dream Score, budget, crowd precedence and expiry, trip state, itinerary scheduling, conflicts, verification gating, brief parsing, tool allowlist, components, circuit breaker, dependency rule, operations urgency, freshness, incident rules and redaction, business review, event catalogue, fairness, owner listing rules, upload checks, owner dashboard, slot finding for an added stop |
-| Integration | 156 | Real PostGIS queries, seed volumes, object-level authorization, itinerary generation, shortlist persistence, incident suspension, re-verification without bulk approval, business and sponsorship decisions, analytics capture, the owner flow from draft to approval and change review, adding a stop to a plan, item changes scoped to their trip |
-| End-to-end | 129 | The full demonstration journey, accessibility across the traveller, operations and owner screens, provider degradation, file access rules, and adding a business to a plan with undo |
+| Unit | 312 | Dream Score, budget, crowd precedence and expiry, trip state, itinerary scheduling, conflicts, verification gating, brief parsing, tool allowlist, components, circuit breaker, dependency rule, operations urgency, freshness, incident rules and redaction, business review, event catalogue, fairness, owner listing rules, upload checks, owner dashboard, slot finding for an added stop, sign-in portals and password hashing |
+| Integration | 161 | Real PostGIS queries, seed volumes, object-level authorization, itinerary generation, shortlist persistence, incident suspension, re-verification without bulk approval, business and sponsorship decisions, analytics capture, the owner flow from draft to approval and change review, adding a stop to a plan, item changes scoped to their trip, sign-in refusals and lockout |
+| End-to-end | 145 | The full demonstration journey, accessibility across the traveller, operations and owner screens, provider degradation, file access rules, adding a business to a plan with undo, and the three sign-in pages |
 
 Integration and end-to-end tests need the database running. The integration
 suite reseeds once before it starts, because several fixtures are relative to

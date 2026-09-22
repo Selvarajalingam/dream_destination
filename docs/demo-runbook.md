@@ -153,7 +153,7 @@ anywhere.
 
 ### 11. Operations
 
-Go to **Profile** → sign in as **Tourism admin** → **Open the operations area**.
+Open **/admin/login**, press **Use this account** beside Tourism admin, then **Sign in**. You land on the operations overview.
 
 **Verification queue (A02).** Two items: one under review, one whose approval
 has expired. Open the one under review.
@@ -177,8 +177,8 @@ your reason. It expires on its own; overrides never linger.
 
 ### 12. A local business owner
 
-Go to **Profile** → sign in as **Business owner** → **Open your business
-listings**. This account owns Badaga Home Kitchen, which is live, and two
+Open **/business/login**, press **Use this account** beside Badaga Home
+Kitchen, then **Sign in**. This account owns Badaga Home Kitchen, which is live, and two
 listings that start in review.
 
 **Dashboard (B05).** Open Badaga Home Kitchen. A traveller report is waiting
@@ -236,7 +236,7 @@ Also `unknown`. Expiry is enforced in the domain and again in SQL.
 | Crowd reads Unknown everywhere | Seed is stale; observations expired | `npm run db:seed` |
 | Ooty does not show Heavy crowd | Override expired after six hours | `npm run db:seed` |
 | Offline help is blank | Service worker not yet installed | Load the app once online, then go offline |
-| Guest cannot create a second trip | Working as intended: one plan before sign-in | Sign in from Profile, or use a private window |
+| Guest cannot create a second trip | Working as intended: one plan before sign-in | Sign in at /login, or use a private window |
 | Port 5433 in use | Another Postgres container | Change the port in `docker-compose.yml` and `.env` together |
 
 ## Questions you should expect

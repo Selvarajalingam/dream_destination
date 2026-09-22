@@ -1,9 +1,11 @@
+import { DEMO_ACCOUNTS } from '../../src/modules/identity/domain/demo-accounts';
+import { hashPassword } from '../../src/server/password';
 import type { SeedSql } from './types';
 
 /**
- * Demonstration accounts. No passwords are stored: the pilot authentication
- * route is an open production decision (PRD Part II §20), so the demo signs in
- * by selecting a role. Real credentials never belong in a seed script.
+ * Demonstration accounts. Their passwords are the demonstration ones listed
+ * in src/modules/identity/domain/demo-accounts.ts, stored only as scrypt
+ * hashes. Real credentials never belong in a seed script.
  */
 
 export type UserKey = 'traveler' | 'verifier' | 'admin' | 'owner_tea' | 'owner_kitchen';
@@ -76,6 +78,15 @@ export async function seedUsers(tx: SeedSql): Promise<Record<UserKey, string>> {
         VALUES (${row.id}, 'preference_memory', '2026-09-01', true)
       `;
     }
+  }
+
+  for (const account of DEMO_ACCOUNTS) {
+    const [user] = await tx<{ id: string }[]>`SELECT id FROM users WHERE email = ${account.email}`;
+    if (user === undefined) continue;
+    await tx`
+      INSERT INTO user_credentials (user_id, password_hash)
+      VALUES (${user.id}, ${await hashPassword(account.password)})
+    `;
   }
 
   return ids;

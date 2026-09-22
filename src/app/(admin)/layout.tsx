@@ -2,6 +2,7 @@ import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { getSession } from '@/server/session';
 import { isAdmin } from '@/server/authorize';
+import { SignOutButton } from '@/components/SignOutButton';
 
 /**
  * Administration shell — PRD Part I §3.3.
@@ -25,7 +26,23 @@ const NAV = [
 export default async function AdminLayout({ children }: { children: ReactNode }) {
   const session = await getSession();
 
-  if (session === null || !isAdmin(session)) {
+  if (session === null || session.isGuest) {
+    return (
+      <main className="page-gutter py-10">
+        <h1 className="text-[26px]">Operations staff only</h1>
+        <p className="mt-2 text-[16px] text-text-secondary">Sign in with a staff account to continue.</p>
+        <Link
+          href="/admin/login"
+          data-touch-target
+          className="mt-4 inline-flex min-h-[44px] items-center rounded-xl bg-brand-deep px-4 text-[14px] font-[650] text-white"
+        >
+          Staff sign-in
+        </Link>
+      </main>
+    );
+  }
+
+  if (!isAdmin(session)) {
     return (
       <main className="page-gutter py-10">
         <h1 className="text-[26px]">Not available</h1>
@@ -67,6 +84,10 @@ export default async function AdminLayout({ children }: { children: ReactNode })
                 {item.label}
               </Link>
             ))}
+            <SignOutButton
+              redirectTo="/admin/login"
+              className="inline-flex min-h-[44px] items-center rounded-lg px-3 text-[14px] font-[650] hover:bg-white/10"
+            />
           </nav>
         </div>
       </header>

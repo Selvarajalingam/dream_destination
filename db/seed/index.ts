@@ -29,6 +29,7 @@ import { seedVerifications } from './verifications';
  * exists.
  */
 const TABLES_TO_CLEAR = [
+  'user_credentials',
   'freshness_assignments',
   'analytics_events',
   'idempotency_keys',

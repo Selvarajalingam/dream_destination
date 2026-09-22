@@ -5,12 +5,12 @@ import { json, route } from '@/server/handler';
 import { problems } from '@/server/problem';
 
 /**
- * POST /api/v1/demo-session — sign in as a seeded demonstration account.
+ * POST /api/v1/demo-session — sign in as a seeded demonstration account
+ * without a password.
  *
- * The pilot authentication route is an open production decision (PRD Part II
- * §20), so the demonstration signs in by selecting a seeded role rather than
- * by password. This endpoint refuses to run outside a local or preview
- * environment, so it cannot become a way in anywhere real.
+ * People sign in on the traveller, business owner and staff pages. This
+ * shortcut exists for automated tests, and refuses to run outside a local or
+ * preview environment, so it cannot become a way in anywhere real.
  */
 
 const BodySchema = z.object({
