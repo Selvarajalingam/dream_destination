@@ -19,12 +19,13 @@ The PRD's required demonstration journey works end to end:
 
 | Area | Screens |
 |---|---|
-| Traveller | T01 Home, T03 Dream AI, T04 Shortlist, T06 Destination, T08 Budget, T09 Itinerary and map, T10 Place, T11 Verification, T12 Local business, T14 Trips, T16–T17 Trip Mode, T18 Nearby help, T19 Story, T20 Rules, T21 Offline pack, T23 Profile |
+| Traveller | T01 Home, T03 Dream AI, T04 Shortlist, T06 Destination, T08 Budget, T09 Itinerary and map, T10 Place, T11 Verification, T12 Local business, T13 Booking options, T14 Trips, T16–T17 Trip Mode, T18 Nearby help, T19 Story, T20 Rules, T21 Offline pack, T23 Profile |
 | Business owner | B01 Onboarding start, B02 Details with autosave, B03 Verification evidence, B04 Listing preview, B05 Dashboard, B06 Updates, in English and Tamil |
 | Administration | A01 Operations overview, A02 Review queue, A03 Verification workspace, A04 Crowd operations, A05 Content freshness, A06 Incident triage, A07 Local business review, A08 Impact analytics |
 
-Out of scope for this build, and deferred deliberately: the booking provider
-integration behind T13, web push delivery, the pgvector retrieval path for
+Out of scope for this build, and deferred deliberately: a contracted booking
+provider behind T13 — the adapter is there and runs against a sandbox that
+labels itself — web push delivery, the pgvector retrieval path for
 grounding, and the 50-prompt AI evaluation set from PRD Part II §8.6.
 
 The Tamil copy for the owner screens was written for this build and needs a
@@ -82,6 +83,7 @@ The app runs fully without any third-party credentials:
 | Dream AI | Deterministic brief parser, labelled in the UI | `ANTHROPIC_API_KEY` uses Claude with structured output, falling back per call |
 | Routing | Straight-line estimates, labelled as estimates | `OSRM_BASE_URL` uses real routing, falling back on failure |
 | Cache | In-memory, single process | `REDIS_URL` uses Redis |
+| Booking offers | Sandbox provider, labelled as demonstration data | `BOOKING_BASE_URL` uses a real provider, falling back to the sandbox |
 | Maps | OpenStreetMap tiles, no key required | — |
 
 `GET /api/ready` reports which of these is in use.
@@ -94,9 +96,9 @@ npm run verify    # typecheck, unit, integration, end-to-end
 
 | Suite | Count | What it covers |
 |---|---:|---|
-| Unit | 312 | Dream Score, budget, crowd precedence and expiry, trip state, itinerary scheduling, conflicts, verification gating, brief parsing, tool allowlist, components, circuit breaker, dependency rule, operations urgency, freshness, incident rules and redaction, business review, event catalogue, fairness, owner listing rules, upload checks, owner dashboard, slot finding for an added stop, sign-in portals and password hashing |
-| Integration | 161 | Real PostGIS queries, seed volumes, object-level authorization, itinerary generation, shortlist persistence, incident suspension, re-verification without bulk approval, business and sponsorship decisions, analytics capture, the owner flow from draft to approval and change review, adding a stop to a plan, item changes scoped to their trip, sign-in refusals and lockout |
-| End-to-end | 145 | The full demonstration journey, accessibility across the traveller, operations and owner screens, provider degradation, file access rules, adding a business to a plan with undo, and the three sign-in pages |
+| Unit | 328 | Dream Score, budget, crowd precedence and expiry, trip state, itinerary scheduling, conflicts, verification gating, brief parsing, tool allowlist, components, circuit breaker, dependency rule, operations urgency, freshness, incident rules and redaction, business review, event catalogue, fairness, owner listing rules, upload checks, owner dashboard, slot finding for an added stop, sign-in portals and password hashing, booking states and provider degradation |
+| Integration | 168 | Real PostGIS queries, seed volumes, object-level authorization, itinerary generation, shortlist persistence, incident suspension, re-verification without bulk approval, business and sponsorship decisions, analytics capture, the owner flow from draft to approval and change review, adding a stop to a plan, item changes scoped to their trip, sign-in refusals and lockout, booking handoff and manual references |
+| End-to-end | 149 | The full demonstration journey, accessibility across the traveller, operations and owner screens, provider degradation, file access rules, adding a business to a plan with undo, the three sign-in pages, and booking handoff without a claimed confirmation |
 
 Integration and end-to-end tests need the database running. The integration
 suite reseeds once before it starts, because several fixtures are relative to

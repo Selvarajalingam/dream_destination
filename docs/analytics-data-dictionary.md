@@ -61,6 +61,7 @@ details, health or accessibility needs, or document content.
 | `business_directions` | Directions to a business are opened | `businessId`; `category` | Browser, business page |
 | `business_contact` | A business is called | `businessId`; `category` | Browser, business page |
 | `business_itinerary_add` | A business is added to a plan | `businessId`; `category` | Server, add-to-trip endpoint |
+| `booking_handoff` | A traveller opens a provider's own site from booking options | `tripId`; `kind`: `stay` \| `transport` | Server, booking handoff endpoint |
 
 `category` is one of: restaurant, homestay, artisan, guide, cafe, farm,
 transport, shop.

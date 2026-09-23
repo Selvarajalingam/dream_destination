@@ -128,6 +128,25 @@ Open **Know before you visit** on Mukurthi trail. Every rule names its issuing
 authority and when it was last checked. Two rules carry a stale warning on
 purpose.
 
+### 8b. Booking, without pretending to book
+
+From the trip, open **Booking options**. Every price carries its currency and
+when it was checked; taxes read included, extra or *not stated by the
+provider*; cancellation says what the provider said, or that it said nothing.
+
+Press **Open** on one. Note the notice before anything opens: the provider
+takes the booking and the payment. Continue, and the sandbox page says plainly
+that no booking exists and hands you a reference.
+
+Back on the trip, the row reads **Sent to the provider** — *"Whether you booked
+there is not something we can see."* Paste a card number into the reference
+field: it is refused. Paste the reference: the row reads **Reference added by
+you**. Mark it confirmed and note that it asks where the confirmation came
+from, and records that answer.
+
+**Worth saying:** the product never claims to have booked anything, and the
+five states in the PRD are the only ones it can be in.
+
 ### 9. Offline
 
 Back on the trip, press **Save for offline**. Each resource reports

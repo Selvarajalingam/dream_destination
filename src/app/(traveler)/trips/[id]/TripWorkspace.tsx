@@ -222,6 +222,13 @@ export function TripWorkspace({
             Budget planner
           </Link>
           <Link
+            href={`/trips/${state.trip.id}/bookings`}
+            data-touch-target
+            className="inline-flex min-h-[44px] items-center rounded-xl border border-border-subtle px-4 text-[14px] font-[650]"
+          >
+            Booking options
+          </Link>
+          <Link
             href={`/trips/${state.trip.id}/offline`}
             data-touch-target
             className="inline-flex min-h-[44px] items-center rounded-xl border border-border-subtle px-4 text-[14px] font-[650]"

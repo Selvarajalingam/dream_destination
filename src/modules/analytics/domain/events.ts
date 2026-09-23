@@ -50,6 +50,9 @@ export const EVENT_CATALOGUE = {
   business_directions: z.object({ businessId: id, category }).strict(),
   business_contact: z.object({ businessId: id, category }).strict(),
   business_itinerary_add: z.object({ businessId: id, category }).strict(),
+
+  // --- Booking handoff (E13) ----------------------------------------------
+  booking_handoff: z.object({ tripId: id, kind: z.enum(['stay', 'transport']) }).strict(),
 } as const;
 
 export type EventName = keyof typeof EVENT_CATALOGUE;
