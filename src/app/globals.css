@@ -54,6 +54,7 @@
   --radius-input: 12px;
 
   --font-sans: 'Manrope', 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
   --font-indic: 'Noto Sans', 'Noto Sans Tamil', var(--font-sans);
 
   /* Typography scale — PRD Part I §4.2 */
@@ -155,6 +156,11 @@
 
   @media (min-width: 1024px) {
     .section-gap > * + * { margin-top: 48px; }
+  }
+
+  /* Breaks out of the page gutter to span the viewport; the shell clips overflow. */
+  .full-bleed {
+    margin-inline: calc(50% - 50vw);
   }
 
   /* Long unbroken strings wrap instead of widening their container. */

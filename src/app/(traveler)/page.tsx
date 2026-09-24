@@ -2,6 +2,17 @@ import Link from 'next/link';
 import { catalogRepository } from '@/modules/catalog/repository';
 import { businessRepository } from '@/modules/businesses/repository';
 import { formatInrRange } from '@/shared/money';
+import { Landscape, sceneForIndex, sceneForThemes } from '@/components/landing/Landscape';
+import {
+  Band,
+  BusinessTile,
+  DestinationCard,
+  GemCard,
+  ICONS,
+  Icon,
+  Rail,
+  WideCard,
+} from '@/components/landing/kit';
 import { HomeSearch } from './HomeSearch';
 
 /**
@@ -25,92 +36,130 @@ export default async function HomePage() {
     businessRepository.findNearby(PILOT_CENTER, 60_000, { limit: 6 }),
   ]);
 
+  const cost = (destination: (typeof withinBudget)[number]): string =>
+    formatInrRange((destination.baseCostLowInr ?? 0) * 100, (destination.baseCostHighInr ?? 0) * 100);
+
   return (
-    <div className="section-gap">
+    <div className="-mb-5 -mt-5">
       {/* Hero and planning entry — must be above the fold at 360×800. */}
-      <section>
-        <h1 className="text-[32px] leading-tight lg:text-[42px]">Where do you want to dream today?</h1>
-        <p className="mt-2 text-[16px] text-text-secondary">
-          Describe a trip in your own words, or pick somewhere to start.
-        </p>
-        <HomeSearch />
+      <section className="full-bleed relative overflow-hidden bg-[linear-gradient(135deg,#e4f2fb_0%,#f2faf7_55%,#fff6e8_100%)]">
+        <div
+          aria-hidden="true"
+          className="absolute inset-y-0 right-0 hidden w-[62%] [mask-image:linear-gradient(to_right,transparent,black_38%)] md:block"
+        >
+          <Landscape scene="hills" className="h-full w-full" />
+        </div>
+        <div className="page-gutter relative py-10 lg:py-16">
+          <div className="md:w-[58%] lg:w-[52%]">
+            <p className="text-[13px] font-[700] uppercase tracking-[0.14em] text-text-secondary">
+              Plan smarter. Travel deeper.
+            </p>
+            <h1 className="mt-2 text-[36px] leading-[1.08] text-brand-deep lg:text-[60px]">
+              Where do you want to{' '}
+              <span className="block font-display font-[600] italic text-brand-primary">dream today?</span>
+            </h1>
+            <p className="mt-3 text-[16px] text-text-secondary lg:text-[18px]">
+              Describe a trip in your own words, or pick somewhere to start.
+            </p>
+            <HomeSearch />
+          </div>
+        </div>
       </section>
 
-      <Section
+      <Band
+        id="within-budget"
+        tone="base"
+        icon={ICONS.wallet}
         title="Within your budget"
         reason="Destinations whose typical trip cost starts under ₹15,000."
       >
-        {withinBudget.map((destination) => (
-          <DestinationTile
-            key={destination.id}
-            slug={destination.slug}
-            name={destination.name}
-            district={destination.district}
-            summary={destination.summary}
-            costLow={(destination.baseCostLowInr ?? 0) * 100}
-            costHigh={(destination.baseCostHighInr ?? 0) * 100}
-          />
-        ))}
-      </Section>
+        <Rail columns="sm:grid-cols-2 lg:grid-cols-4">
+          {withinBudget.map((destination) => (
+            <DestinationCard
+              key={destination.id}
+              href={`/destinations/${destination.slug}`}
+              name={destination.name}
+              district={destination.district}
+              summary={destination.summary}
+              cost={cost(destination)}
+              themes={destination.themes}
+              scene={sceneForThemes(destination.themes)}
+            />
+          ))}
+        </Rail>
+      </Band>
 
-      <Section title="Quieter places this weekend" reason="Destinations that tend to be less busy.">
-        {quieter.map((destination) => (
-          <DestinationTile
-            key={destination.id}
-            slug={destination.slug}
-            name={destination.name}
-            district={destination.district}
-            summary={destination.summary}
-            costLow={(destination.baseCostLowInr ?? 0) * 100}
-            costHigh={(destination.baseCostHighInr ?? 0) * 100}
-          />
-        ))}
-      </Section>
+      <Band
+        id="quieter"
+        tone="mint"
+        icon={ICONS.leaf}
+        title="Quieter places this weekend"
+        reason="Destinations that tend to be less busy."
+      >
+        <Rail columns="sm:grid-cols-1 lg:grid-cols-2 [&>*]:max-w-[420px] sm:[&>*]:max-w-none">
+          {quieter.map((destination) => (
+            <WideCard
+              key={destination.id}
+              href={`/destinations/${destination.slug}`}
+              name={destination.name}
+              district={destination.district}
+              summary={destination.summary}
+              cost={cost(destination)}
+              themes={destination.themes}
+              scene={sceneForThemes(destination.themes, 'forest')}
+            />
+          ))}
+        </Rail>
+      </Band>
 
-      <Section
+      <Band
+        id="verified-gems"
+        tone="sky"
+        icon={ICONS.gem}
         title="Dream Verified hidden gems"
         reason="Lesser-known places a reviewer has checked, with their limitations recorded."
       >
-        {verifiedGems.map((place) => (
-          <Link
-            key={place.id}
-            href={`/places/${place.slug}`}
-            className="block min-w-[240px] flex-1 rounded-[16px] border border-border-subtle p-4 hover:bg-surface-subtle"
-          >
-            <p className="text-[16px] font-[650]">{place.name}</p>
-            <p className="mt-1 line-clamp-2 text-[14px] text-text-secondary">{place.description}</p>
-            <span className="mt-2 inline-block text-[13px] font-[650] text-status-good-text">
-              Dream Verified
-            </span>
-          </Link>
-        ))}
-      </Section>
+        <Rail columns="sm:grid-cols-2 lg:grid-cols-3">
+          {verifiedGems.map((place, index) => (
+            <GemCard
+              key={place.id}
+              href={`/places/${place.slug}`}
+              name={place.name}
+              description={place.description}
+              scene={sceneForIndex(index)}
+            />
+          ))}
+        </Rail>
+      </Band>
 
-      <Section
+      <Band
+        id="support-local"
+        tone="warm"
+        icon={ICONS.store}
         title="Support local"
         reason="Small businesses near the pilot region, listed with owner-confirmed details."
       >
-        {supportLocal.map((business) => (
-          <Link
-            key={business.id}
-            href={`/businesses/${business.slug}`}
-            className="block min-w-[220px] flex-1 rounded-[16px] border border-border-subtle bg-surface-warm p-4 hover:brightness-[0.99]"
-          >
-            <p className="text-[16px] font-[650]">{business.name}</p>
-            <p className="mt-1 text-[14px] capitalize text-text-secondary">
-              {business.category.replace(/_/g, ' ')}
-            </p>
-            {business.sponsored && (
-              <span
-                data-testid="sponsored-label"
-                className="mt-2 inline-block rounded-full bg-surface-subtle px-2 py-0.5 text-[13px] font-[650] text-text-secondary"
-              >
-                Sponsored
-              </span>
-            )}
-          </Link>
-        ))}
-      </Section>
+        <Rail columns="sm:grid-cols-2 lg:grid-cols-3">
+          {supportLocal.map((business) => (
+            <BusinessTile
+              key={business.id}
+              href={`/businesses/${business.slug}`}
+              name={business.name}
+              category={business.category}
+              sponsored={business.sponsored}
+            />
+          ))}
+        </Rail>
+      </Band>
+
+      <Link
+        href="/dream-ai"
+        data-touch-target
+        className="fixed bottom-[84px] right-4 z-30 inline-flex items-center gap-2 rounded-full bg-brand-primary px-4 text-[14px] font-[700] text-white shadow-lg hover:bg-brand-primary-hover md:bottom-6 md:right-6"
+      >
+        <Icon d={ICONS.chat} size={18} />
+        <span className="sr-only sm:not-sr-only">Ask Dream AI</span>
+      </Link>
     </div>
   );
 }
@@ -128,55 +177,4 @@ async function verifiedHiddenGems() {
     ORDER BY p.name
     LIMIT 6
   `;
-}
-
-function Section({
-  title,
-  reason,
-  children,
-}: {
-  title: string;
-  reason: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <section>
-      <h2 className="text-[21px] lg:text-[24px]">{title}</h2>
-      <p className="mt-1 text-[14px] text-text-secondary">{reason}</p>
-      <div className="mt-3 flex gap-3 overflow-x-auto pb-2 md:flex-wrap md:overflow-visible">
-        {children}
-      </div>
-    </section>
-  );
-}
-
-function DestinationTile({
-  slug,
-  name,
-  district,
-  summary,
-  costLow,
-  costHigh,
-}: {
-  slug: string;
-  name: string;
-  district: string | null;
-  summary: string;
-  costLow: number;
-  costHigh: number;
-}) {
-  return (
-    <Link
-      href={`/destinations/${slug}`}
-      className="block min-w-[260px] flex-1 rounded-[16px] border border-border-subtle p-4 hover:bg-surface-subtle"
-    >
-      <p className="text-[16px] font-[650]">{name}</p>
-      {district !== null && <p className="text-[14px] text-text-secondary">{district}</p>}
-      <p className="mt-2 line-clamp-2 text-[14px] text-text-secondary">{summary}</p>
-      <p className="mt-2 text-[14px] font-[650]">
-        {formatInrRange(costLow, costHigh)}{' '}
-        <span className="font-normal text-text-secondary">estimated trip cost</span>
-      </p>
-    </Link>
-  );
 }

@@ -1,6 +1,13 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 
+const DESKTOP_LINKS = [
+  { href: '/', label: 'Home' },
+  { href: '/explore', label: 'Explore' },
+  { href: '/trips', label: 'Trips' },
+  { href: '/dream-ai', label: 'AI Assistant' },
+];
+
 /**
  * Traveller shell — PRD Part I §3.1.
  *
@@ -19,7 +26,7 @@ const NAV = [
 
 export default function TravelerLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="min-h-dvh pb-[76px]">
+    <div className="min-h-dvh overflow-x-clip pb-[76px] md:pb-0">
       <a
         href="#main"
         className="visually-hidden focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-xl focus:bg-brand-primary focus:px-4 focus:py-3 focus:text-white"
@@ -27,22 +34,56 @@ export default function TravelerLayout({ children }: { children: ReactNode }) {
         Skip to content
       </a>
 
-      <header className="border-b border-border-subtle bg-surface-base">
-        <div className="page-gutter flex min-h-[56px] items-center justify-between gap-4 py-2">
-          <Link href="/" className="text-[18px] font-[750] text-brand-deep">
+      <header className="sticky top-0 z-40 border-b border-border-subtle bg-white/90 backdrop-blur">
+        <div className="page-gutter flex min-h-[64px] items-center justify-between gap-4 py-2">
+          <Link href="/" className="flex items-center gap-2.5 whitespace-nowrap text-[17px] font-[800] text-brand-deep sm:text-[18px]">
+            <svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true">
+              <rect width="34" height="34" rx="10" fill="#0f766e" />
+              <path d="M6 26 15 11l5 8 3-4 5 11Z" fill="#ffffff" />
+              <circle cx="24" cy="10" r="2.5" fill="#f28c28" />
+            </svg>
             Dream Destination
           </Link>
-          <div className="flex items-center gap-2">
-            <span className="rounded-full bg-surface-subtle px-3 py-1 text-[13px] font-[650] text-text-secondary">
-              Demonstration data
-            </span>
-          </div>
+          <nav aria-label="Primary" className="hidden items-center gap-1 md:flex">
+            {DESKTOP_LINKS.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                data-touch-target
+                className="inline-flex items-center rounded-full px-4 text-[15px] font-[650] text-text-primary hover:bg-surface-subtle"
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
+          <span className="whitespace-nowrap rounded-full border border-border-subtle bg-white px-3 py-1 text-[13px] font-[650] text-text-secondary">
+            <span className="sm:hidden">Demo data</span>
+            <span className="hidden sm:inline">Demonstration data</span>
+          </span>
         </div>
       </header>
 
       <main id="main" className="page-gutter py-5">
         {children}
       </main>
+
+      <footer className="bg-brand-deep text-[#d5e0ea]">
+        <div className="page-gutter flex flex-col gap-4 py-8 md:flex-row md:items-center md:justify-between">
+          <div>
+            <p className="text-[17px] font-[800] text-white">Dream Destination</p>
+            <p className="text-[14px]">Meaningful trips for a brighter tomorrow.</p>
+          </div>
+          <ul className="flex flex-wrap gap-x-5 gap-y-1 text-[14px] font-[650]">
+            {DESKTOP_LINKS.map((item) => (
+              <li key={item.href}>
+                <Link href={item.href} className="inline-block py-2 hover:text-white hover:underline">
+                  {item.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </footer>
 
       {/*
         Announcements for AI generation and budget changes are written here by
@@ -52,7 +93,7 @@ export default function TravelerLayout({ children }: { children: ReactNode }) {
 
       <nav
         aria-label="Main"
-        className="fixed inset-x-0 bottom-0 z-40 border-t border-border-subtle bg-surface-base pb-[env(safe-area-inset-bottom)]"
+        className="fixed inset-x-0 bottom-0 z-40 md:hidden border-t border-border-subtle bg-surface-base pb-[env(safe-area-inset-bottom)]"
       >
         <ul className="mx-auto flex max-w-2xl">
           {NAV.map((item) => (
