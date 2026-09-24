@@ -325,3 +325,50 @@ async function cacheTripPack(manifest, client) {
     results,
   });
 }
+
+/**
+ * Push notifications (PRD Part I §11.4).
+ *
+ * The payload is already decrypted by the browser. A notification is shown
+ * for every push, because a push that shows nothing is what browsers revoke
+ * permission over, and the tag replaces an earlier one about the same thing
+ * rather than stacking duplicates.
+ */
+self.addEventListener('push', (event) => {
+  let message = { title: 'Dream Destination', body: 'Open the app for details.', url: '/alerts', tag: 'dd' };
+  try {
+    if (event.data) message = { ...message, ...event.data.json() };
+  } catch {
+    // A malformed payload still shows something rather than nothing.
+  }
+
+  event.waitUntil(
+    self.registration.showNotification(message.title, {
+      body: message.body,
+      tag: message.tag,
+      data: { url: message.url ?? '/alerts' },
+      icon: '/icons/icon.svg',
+      badge: '/icons/icon.svg',
+    }),
+  );
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const target = (event.notification.data && event.notification.data.url) || '/alerts';
+
+  event.waitUntil(
+    (async () => {
+      const clients = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+      // Reuse an open tab rather than piling up new ones.
+      for (const client of clients) {
+        if ('focus' in client) {
+          await client.focus();
+          if ('navigate' in client) await client.navigate(target);
+          return;
+        }
+      }
+      await self.clients.openWindow(target);
+    })(),
+  );
+});

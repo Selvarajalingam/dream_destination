@@ -6,6 +6,7 @@ import { incidentsService } from '@/modules/incidents/service';
 import { initialSeverity, redactReport } from '@/modules/incidents/domain/incidents';
 import { tripsRepository } from '@/modules/trips/repository';
 import { tripsService } from '@/modules/trips/service';
+import { notificationsService } from '@/modules/notifications/service';
 import { cleanupTestUsers, createTestUser } from './helpers';
 
 afterAll(async () => {
@@ -154,6 +155,62 @@ describe('suspension', () => {
     const closure = detail!.conflicts.find((entry) => /closed to visitors/.test(entry.message));
     expect(closure).toBeDefined();
     expect(closure!.severity).toBe('blocking');
+  });
+
+  it('tells that traveller, as a safety alert rather than a reminder', async () => {
+    // The suspension above happened before this trip existed, so suspend a
+    // second time against a plan that already includes the place.
+    const admin = await adminId();
+    const traveller = await createTestUser();
+    const destination = await catalogRepository.findDestinationBySlug('valparai-anamalai');
+    const trip = await tripsRepository.create({
+      ownerUserId: traveller.userId,
+      destinationId: destination!.id,
+      title: 'Falls weekend',
+      startDate: new Date('2026-12-19'),
+      endDate: new Date('2026-12-19'),
+      originText: 'Coimbatore',
+      origin: { lat: 11.0168, lng: 76.9558 },
+      party: {},
+      tripBrief: { durationDays: 1, interests: ['nature'] },
+      totalBudgetInr: 25_000,
+    });
+
+    const [place] = await sql<{ id: string }[]>`SELECT id FROM places WHERE slug = 'monkey-falls'`;
+    await tripsRepository.replaceItinerary(trip.id, [
+      {
+        dayNumber: 1,
+        date: new Date('2026-12-19'),
+        title: 'Falls',
+        items: [
+          {
+            placeId: place.id,
+            itemType: 'place',
+            title: 'Monkey Falls',
+            startsAt: new Date('2026-12-19T04:30:00Z'),
+            durationMinutes: 90,
+            sortOrder: 0,
+            travelFromPrevious: { minutes: 0, meters: 0, mode: 'car' },
+            priceEstimate: { expectedMinor: 2000, priceState: 'historical' },
+          },
+        ],
+      },
+    ]);
+
+    const report = await fileReport('monkey-falls', 'danger', 'Water levels rose without warning while people were in the pool.');
+    await incidentsService.act(report, { action: 'suspend', reason: 'Flash flooding reported in the pool area.' }, admin);
+
+    const alerts = await notificationsService.alerts(traveller.userId);
+    const alert = alerts.find((entry) => /Monkey Falls is closed/.test(entry.title));
+    expect(alert).toBeDefined();
+    expect(alert!.category).toBe('safety');
+    expect(alert!.body).toMatch(/Falls weekend/);
+
+    // Put the catalogue back: later suites share this database.
+    await incidentsService.act(report, { action: 'resolve', reason: 'Water levels back to normal; barriers added.' }, admin);
+    await incidentsService.act(report, { action: 'reopen', reason: 'Reopening to reinstate the listing.' }, admin);
+    await incidentsService.act(report, { action: 'reinstate', reason: 'Pool area reopened by the forest department.' }, admin);
+    await incidentsService.act(report, { action: 'resolve', reason: 'Closed after the listing was reinstated.' }, admin);
   });
 
   it('will not reinstate while another open report keeps the listing down', async () => {

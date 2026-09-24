@@ -121,6 +121,15 @@
   input[type='radio'] {
     min-height: 44px;
   }
+
+  /*
+    Leaflet's attribution links sit inside running text, where colour alone
+    must not be what marks them as links. The attribution itself is a licence
+    requirement, so it stays; only its presentation is fixed.
+  */
+  .leaflet-control-attribution a {
+    text-decoration: underline;
+  }
 }
 
 @layer utilities {

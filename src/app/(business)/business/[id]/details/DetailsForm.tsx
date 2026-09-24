@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Button, Card } from '@/components/ui/primitives';
 import { ApiProblemError, api } from '@/lib/api-client';
+import { useHydrated } from '@/lib/use-hydrated';
 import type { OwnerCopy } from '../../copy';
 
 const PinPicker = dynamic(() => import('./PinPicker').then((module) => module.PinPicker), { ssr: false });
@@ -434,13 +435,6 @@ export function DetailsForm({
       </fieldset>
     </div>
   );
-}
-
-/** False during the server render and before hydration, true after. */
-export function useHydrated(): boolean {
-  const [hydrated, setHydrated] = useState(false);
-  useEffect(() => setHydrated(true), []);
-  return hydrated;
 }
 
 export function HoursEditor({

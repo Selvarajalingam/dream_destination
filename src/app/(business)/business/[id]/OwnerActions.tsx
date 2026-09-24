@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useState, type FormEvent } from 'react';
 import { Button } from '@/components/ui/primitives';
 import { ApiProblemError, api } from '@/lib/api-client';
+import { useHydrated } from '@/lib/use-hydrated';
 
 /** Small owner actions on the B05 dashboard. Each reports its own outcome. */
 
@@ -12,6 +13,7 @@ const describe = (caught: unknown, fallback: string): string =>
 
 function useAction() {
   const router = useRouter();
+  const hydrated = useHydrated();
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -30,7 +32,9 @@ function useAction() {
     }
   };
 
-  return { busy, done, error, run };
+  // `busy` also covers the pre-hydration moment, so every control that
+  // disables on it is inert until it can actually act.
+  return { busy: busy || !hydrated, done, error, run };
 }
 
 function Outcome({ done, doneText, error }: { done: boolean; doneText: string; error: string | null }) {

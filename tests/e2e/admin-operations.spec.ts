@@ -39,7 +39,8 @@ test.describe('operations screens', () => {
 
   test('A01 leads with the critical incident', async ({ page }) => {
     await page.goto('/admin');
-    await expect(page.getByTestId('ops-headline')).toHaveText(/critical incident needs a decision/);
+    // Plural tolerated: other suites share this database and may file reports.
+    await expect(page.getByTestId('ops-headline')).toHaveText(/critical incidents? needs? a decision/);
     const first = page.getByTestId('urgent-item').first();
     await expect(first).toHaveAttribute('data-kind', 'incident');
     await expect(first).toHaveAttribute('data-tier', 'Act now');

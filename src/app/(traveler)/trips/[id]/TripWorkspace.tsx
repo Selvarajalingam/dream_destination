@@ -7,6 +7,7 @@ import { Button, Card, SegmentedControl } from '@/components/ui/primitives';
 import { BudgetMeter, PriceStateLabel, type BudgetView } from '@/components/patterns/BudgetMeter';
 import { CrowdStatusBadge } from '@/components/patterns/CrowdStatusBadge';
 import { ErrorState, LoadingState } from '@/components/states/states';
+import { EnablePush, TripReminderCheck } from '@/components/patterns/PushControls';
 import { ApiProblemError, api } from '@/lib/api-client';
 import { formatInr } from '@/shared/money';
 import { formatDistance } from '@/shared/geo';
@@ -222,6 +223,13 @@ export function TripWorkspace({
             Budget planner
           </Link>
           <Link
+            href="/alerts"
+            data-touch-target
+            className="inline-flex min-h-[44px] items-center rounded-xl border border-border-subtle px-4 text-[14px] font-[650]"
+          >
+            Alerts
+          </Link>
+          <Link
             href={`/trips/${state.trip.id}/bookings`}
             data-touch-target
             className="inline-flex min-h-[44px] items-center rounded-xl border border-border-subtle px-4 text-[14px] font-[650]"
@@ -244,6 +252,12 @@ export function TripWorkspace({
           </Link>
         </div>
       </header>
+
+      {/* A saved trip is the earliest the PRD allows asking (E12-S06). */}
+      <TripReminderCheck tripId={state.trip.id} />
+      <div className="mt-3">
+        <EnablePush compact />
+      </div>
 
       {error !== null && (
         <div className="mt-4">

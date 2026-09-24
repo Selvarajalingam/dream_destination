@@ -3,7 +3,7 @@
 import { useState, type FormEvent } from 'react';
 import { Button } from '@/components/ui/primitives';
 import { ApiProblemError, api, ensureSession } from '@/lib/api-client';
-import { useHydrated } from '../[id]/details/DetailsForm';
+import { useHydrated } from '@/lib/use-hydrated';
 
 type Labels = { businessName: string; area: string; areaHelp: string; startAction: string; starting: string };
 

@@ -25,8 +25,15 @@ The PRD's required demonstration journey works end to end:
 
 Out of scope for this build, and deferred deliberately: a contracted booking
 provider behind T13 — the adapter is there and runs against a sandbox that
-labels itself — web push delivery, the pgvector retrieval path for
-grounding, and the 50-prompt AI evaluation set from PRD Part II §8.6.
+labels itself — the pgvector retrieval path for grounding, and the 50-prompt
+AI evaluation set from PRD Part II §8.6.
+
+Push notifications are built to the specification and tested, but delivery to
+real browsers has not been exercised: with no VAPID keys configured the alert
+centre says so plainly instead of offering a permission prompt that could not
+deliver. Nothing asks for permission before a trip is saved. Safety alerts are
+sent during quiet hours; everything else waits, and commercial suggestions are
+off until asked for.
 
 The Tamil copy for the owner screens was written for this build and needs a
 native speaker's review before a pilot. Server messages, such as validation
@@ -84,6 +91,7 @@ The app runs fully without any third-party credentials:
 | Routing | Straight-line estimates, labelled as estimates | `OSRM_BASE_URL` uses real routing, falling back on failure |
 | Cache | In-memory, single process | `REDIS_URL` uses Redis |
 | Booking offers | Sandbox provider, labelled as demonstration data | `BOOKING_BASE_URL` uses a real provider, falling back to the sandbox |
+| Notifications | Recorded in the alert centre, nothing sent to devices | `VAPID_*` keys deliver web push to subscribed browsers |
 | Maps | OpenStreetMap tiles, no key required | — |
 
 `GET /api/ready` reports which of these is in use.
@@ -96,9 +104,9 @@ npm run verify    # typecheck, unit, integration, end-to-end
 
 | Suite | Count | What it covers |
 |---|---:|---|
-| Unit | 328 | Dream Score, budget, crowd precedence and expiry, trip state, itinerary scheduling, conflicts, verification gating, brief parsing, tool allowlist, components, circuit breaker, dependency rule, operations urgency, freshness, incident rules and redaction, business review, event catalogue, fairness, owner listing rules, upload checks, owner dashboard, slot finding for an added stop, sign-in portals and password hashing, booking states and provider degradation |
-| Integration | 168 | Real PostGIS queries, seed volumes, object-level authorization, itinerary generation, shortlist persistence, incident suspension, re-verification without bulk approval, business and sponsorship decisions, analytics capture, the owner flow from draft to approval and change review, adding a stop to a plan, item changes scoped to their trip, sign-in refusals and lockout, booking handoff and manual references |
-| End-to-end | 149 | The full demonstration journey, accessibility across the traveller, operations and owner screens, provider degradation, file access rules, adding a business to a plan with undo, the three sign-in pages, and booking handoff without a claimed confirmation |
+| Unit | 354 | Dream Score, budget, crowd precedence and expiry, trip state, itinerary scheduling, conflicts, verification gating, brief parsing, tool allowlist, components, circuit breaker, dependency rule, operations urgency, freshness, incident rules and redaction, business review, event catalogue, fairness, owner listing rules, upload checks, owner dashboard, slot finding for an added stop, sign-in portals and password hashing, booking states and provider degradation, notification policy and push encryption |
+| Integration | 181 | Real PostGIS queries, seed volumes, object-level authorization, itinerary generation, shortlist persistence, incident suspension, re-verification without bulk approval, business and sponsorship decisions, analytics capture, the owner flow from draft to approval and change review, adding a stop to a plan, item changes scoped to their trip, sign-in refusals and lockout, booking handoff and manual references, notifications and safety alerts |
+| End-to-end | 155 | The full demonstration journey, accessibility across the traveller, operations and owner screens, provider degradation, file access rules, adding a business to a plan with undo, the three sign-in pages, booking handoff without a claimed confirmation, and the alert centre |
 
 Integration and end-to-end tests need the database running. The integration
 suite reseeds once before it starts, because several fixtures are relative to

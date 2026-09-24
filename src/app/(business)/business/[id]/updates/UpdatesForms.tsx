@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useState, type FormEvent, type ReactNode } from 'react';
 import { Button, Card } from '@/components/ui/primitives';
 import { ApiProblemError, api } from '@/lib/api-client';
+import { useHydrated } from '@/lib/use-hydrated';
 import type { OwnerCopy } from '../../copy';
 import { DAY_LABEL, HoursEditor, type DetailsInitial } from '../details/DetailsForm';
 
@@ -26,6 +27,7 @@ type Current = DetailsInitial & {
 
 function useSubmit() {
   const router = useRouter();
+  const hydrated = useHydrated();
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -58,7 +60,8 @@ function useSubmit() {
     </>
   );
 
-  return { busy, submit, outcome };
+  // Inert until the page can act, so an early press is never a lost native submit.
+  return { busy: busy || !hydrated, submit, outcome };
 }
 
 export function UpdatesForms({ businessId, current, copy, locale }: { businessId: string; current: Current; copy: OwnerCopy; locale: string }) {

@@ -1,6 +1,8 @@
 import { recordAudit } from '@/server/authorize';
 import { DomainError } from '@/shared/result';
 import { canSuspend, canTransition, type IncidentSeverity } from './domain/incidents';
+import { logger } from '@/platform/observability/logger';
+import { notificationsService } from '@/modules/notifications/service';
 import { incidentsRepository, type IncidentDetail } from './repository';
 
 /**
@@ -79,6 +81,9 @@ export const incidentsService = {
 
         await incidentsRepository.suspendEntity(incident);
         await audit('incident.suspended_listing', { entityStatus: incident.entityStatus }, { reason: command.reason });
+        // A suspension is the safety case notifications exist for: it reaches
+        // travellers with this stop in a plan, quiet hours or not.
+        await notifyTravellers(incident, command.reason);
         await audit(
           `${incident.entityType}.suspended`,
           { status: incident.entityStatus },
@@ -131,3 +136,29 @@ export const incidentsService = {
     return updated;
   },
 };
+
+/**
+ * Tells travellers planning to go there that it is closed. Failing to notify
+ * must not fail the suspension, which is the decision that protects them.
+ */
+async function notifyTravellers(
+  incident: { entityType: string; entityId: string; entityName: string | null },
+  reason: string,
+): Promise<void> {
+  try {
+    const affected = await incidentsRepository.travellersPlanning(incident.entityType, incident.entityId);
+    for (const traveller of affected) {
+      await notificationsService.notify(traveller.userId, {
+        tripId: traveller.tripId,
+        category: 'safety',
+        trigger: `suspended:${incident.entityId}`,
+        title: `${incident.entityName ?? 'A stop on your trip'} is closed to visitors`,
+        body: `${reason} It is on your plan for ${traveller.tripTitle}. Choose another stop for that time.`,
+        url: `/trips/${traveller.tripId}`,
+        windowMinutes: 24 * 60,
+      });
+    }
+  } catch (error) {
+    logger.error('incidents.notify_failed', { reason: error instanceof Error ? error.message : 'unknown' });
+  }
+}

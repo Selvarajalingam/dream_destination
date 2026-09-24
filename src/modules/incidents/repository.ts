@@ -70,6 +70,25 @@ const BASE_JOINS = sql`
 `;
 
 export const incidentsRepository = {
+  /**
+   * Travellers with this entity in a plan that has not finished, so a
+   * suspension can reach the people it actually affects.
+   */
+  async travellersPlanning(entityType: string, entityId: string): Promise<Array<{ userId: string; tripId: string; tripTitle: string }>> {
+    if (entityType !== 'place' && entityType !== 'business') return [];
+    const column = entityType === 'place' ? sql`ii.place_id` : sql`ii.local_business_id`;
+
+    return sql<Array<{ userId: string; tripId: string; tripTitle: string }>>`
+      SELECT DISTINCT t.owner_user_id AS "userId", t.id AS "tripId", t.title AS "tripTitle"
+      FROM trips t
+      JOIN itinerary_days d ON d.trip_id = t.id
+      JOIN itinerary_items ii ON ii.itinerary_day_id = d.id
+      WHERE ${column} = ${entityId}
+        AND t.status IN ('draft', 'upcoming', 'active')
+        AND t.owner_user_id IS NOT NULL
+    `;
+  },
+
   /** Resolves a public slug to the id a report is filed against. */
   async resolveEntity(
     entityType: IncidentEntityType,
