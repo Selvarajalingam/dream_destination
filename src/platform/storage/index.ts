@@ -54,7 +54,7 @@ let store: ObjectStore | null = null;
 
 export function getObjectStore(): ObjectStore {
   if (store === null) {
-    store = new LocalDirectoryStore(path.resolve(process.env.UPLOAD_DIR ?? 'var/uploads'));
+    store = new LocalDirectoryStore(path.resolve(/*turbopackIgnore: true*/ process.env.UPLOAD_DIR ?? 'var/uploads'));
   }
   return store;
 }
