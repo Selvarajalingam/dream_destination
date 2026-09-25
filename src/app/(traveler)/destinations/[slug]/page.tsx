@@ -99,7 +99,7 @@ export default async function DestinationPage({ params }: { params: Promise<{ sl
               <li key={place.id} className="flex flex-wrap items-center justify-between gap-2">
                 <Link
                   href={`/places/${place.slug}`}
-                  className="text-[14px] font-[650] underline-offset-2 hover:underline"
+                  className="inline-flex min-h-[44px] items-center text-[14px] font-[650] underline-offset-2 hover:underline"
                 >
                   {place.name}
                 </Link>
@@ -206,7 +206,7 @@ export default async function DestinationPage({ params }: { params: Promise<{ sl
         </p>
         <Link
           href="/help"
-          className="mt-2 inline-block text-[14px] font-[650] text-brand-primary underline underline-offset-2"
+          className="mt-1 inline-flex min-h-[44px] items-center text-[14px] font-[650] text-brand-primary underline underline-offset-2"
         >
           Open Nearby Help
         </Link>

@@ -31,7 +31,7 @@ test('a traveller completes the full SIH demonstration journey', async ({ page, 
   await expect(page.getByTestId('brief-interests')).toContainText(/nature/i);
 
   // --- Compare destinations ----------------------------------------------
-  await page.getByRole('button', { name: /see destinations/i }).click();
+  await page.getByRole('button', { name: /build my trip/i }).click();
   await expect(page).toHaveURL(/\/shortlist/);
 
   const options = page.getByTestId('shortlist-option');
@@ -126,7 +126,7 @@ test('the journey reaches the first shortlist well inside three minutes', async 
   await page.goto('/');
   await page.getByRole('textbox').first().fill(PROMPT);
   await page.getByRole('button', { name: /start planning/i }).click();
-  await page.getByRole('button', { name: /see destinations/i }).click();
+  await page.getByRole('button', { name: /build my trip/i }).click();
   await expect(page.getByTestId('shortlist-option').first()).toBeVisible();
 
   // PRD Part I §14.2: median first shortlist under three minutes.

@@ -150,13 +150,13 @@ export function TripSummaryPanel({
         Tap any row to change it. Nothing here is guessed from data you did not give us.
       </p>
 
-      <dl className="mt-2">
+      <ul className="mt-2">
         {FIELDS.map((field) => {
           const value = describe(field, brief);
           const isHighlighted = highlighted.includes(field);
 
           return (
-            <div key={field} className="border-t border-border-subtle first:border-t-0">
+            <li key={field} className="border-t border-border-subtle first:border-t-0">
               <button
                 type="button"
                 data-testid={`brief-${field}`}
@@ -167,15 +167,15 @@ export function TripSummaryPanel({
                 )}
               >
                 <Icon d={FIELD_ICONS[field]} size={18} className="text-text-secondary" />
-                <dt className="w-[92px] shrink-0 text-[14px] text-text-secondary">{LABELS[field]}</dt>
-                <dd
+                <span className="w-[92px] shrink-0 text-[14px] text-text-secondary">{LABELS[field]}</span>
+                <span
                   className={clsx(
                     'min-w-0 flex-1 truncate text-[14px]',
                     value === null ? 'font-normal text-text-secondary' : 'font-[600] text-text-primary',
                   )}
                 >
                   {value ?? 'Add'}
-                </dd>
+                </span>
                 {value !== null && (
                   <span
                     aria-hidden="true"
@@ -186,10 +186,10 @@ export function TripSummaryPanel({
                 )}
                 <Icon d="M4 20h4L19 9l-4-4L4 16v4ZM13.500 6.500l4 4" size={16} className="text-text-secondary" />
               </button>
-            </div>
+            </li>
           );
         })}
-      </dl>
+      </ul>
 
       {editing !== null && (
         <EditField

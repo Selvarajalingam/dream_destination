@@ -16,6 +16,12 @@
  */
 
 const VERSION = 'v1';
+
+/**
+ * Registered as /sw.js?dev=1 by the development build. The dev bundler reuses
+ * asset filenames across edits, so cache-first would pin stale CSS and JS.
+ */
+const DEV = new URL(self.location.href).searchParams.get('dev') === '1';
 const SHELL_CACHE = `dd-shell-${VERSION}`;
 const CONTENT_CACHE = `dd-content-${VERSION}`;
 const FRESH_CACHE = `dd-fresh-${VERSION}`;
@@ -119,7 +125,11 @@ self.addEventListener('fetch', (event) => {
   }
 
   if (url.pathname.startsWith('/_next/static/')) {
-    event.respondWith(cacheFirst(request, SHELL_CACHE));
+    event.respondWith(
+      DEV
+        ? fetch(request).catch(async () => (await caches.match(request, MATCH)) ?? Response.error())
+        : cacheFirst(request, SHELL_CACHE),
+    );
     return;
   }
 
