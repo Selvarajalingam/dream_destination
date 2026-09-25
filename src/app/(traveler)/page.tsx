@@ -50,7 +50,7 @@ export default async function HomePage() {
           <Landscape scene="hills" className="h-full w-full" />
         </div>
         <div className="page-gutter relative py-10 lg:py-16">
-          <div className="md:w-[58%] lg:w-[52%]">
+          <div className="md:w-[72%] lg:w-[52%]">
             <p className="text-[13px] font-[700] uppercase tracking-[0.14em] text-text-secondary">
               Plan smarter. Travel deeper.
             </p>

@@ -14,6 +14,19 @@ export function ServiceWorkerRegistration() {
   useEffect(() => {
     if (!('serviceWorker' in navigator)) return;
 
+    // In development the bundler reuses asset filenames across edits, so the
+    // worker's cache-first rule for /_next/static/ would keep serving stale
+    // CSS and JS. Remove any worker and its caches instead of registering.
+    if (process.env.NODE_ENV !== 'production') {
+      void navigator.serviceWorker
+        .getRegistrations()
+        .then((registrations) => Promise.all(registrations.map((registration) => registration.unregister())));
+      void caches
+        .keys()
+        .then((keys) => Promise.all(keys.filter((key) => key.startsWith('dd-')).map((key) => caches.delete(key))));
+      return;
+    }
+
     const register = (): void => {
       void navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(() => {
         // A failed registration is not worth interrupting anyone over: the

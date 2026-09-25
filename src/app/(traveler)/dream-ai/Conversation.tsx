@@ -180,7 +180,7 @@ export function Conversation({
 
   return (
     <div className="mt-5 grid gap-6 lg:grid-cols-[1fr_380px]">
-      <div className="order-2 min-w-0 lg:order-1">
+      <div className="min-w-0">
         <Card className="rounded-[24px] border-brand-primary/30 p-4 shadow-sm sm:p-6">
           {mode === 'deterministic' && messages.length > 0 && (
             <p className="mb-3 rounded-xl border border-border-subtle bg-surface-subtle p-3 text-[14px] text-text-secondary">
@@ -326,7 +326,7 @@ export function Conversation({
         {children}
       </div>
 
-      <Card className="order-1 h-fit min-w-0 rounded-[24px] p-5 lg:order-2 lg:sticky lg:top-4">
+      <Card className="h-fit min-w-0 rounded-[24px] p-5 lg:sticky lg:top-24">
         <TripSummaryPanel brief={brief} highlighted={highlighted} onChange={setBrief} />
         <Button className="mt-5 w-full" onClick={() => void seeDestinations()} disabled={busy || !ready}>
           Build my trip

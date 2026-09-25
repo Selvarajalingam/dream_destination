@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
+import { ScrollHeader } from './ScrollHeader';
 
 const DESKTOP_LINKS = [
   { href: '/', label: 'Home' },
@@ -34,8 +35,7 @@ export default function TravelerLayout({ children }: { children: ReactNode }) {
         Skip to content
       </a>
 
-      <header className="sticky top-0 z-40 border-b border-border-subtle bg-white/90 backdrop-blur">
-        <div className="page-gutter flex min-h-[64px] items-center justify-between gap-4 py-2">
+      <ScrollHeader>
           <Link href="/" className="flex items-center gap-2.5 whitespace-nowrap text-[17px] font-[800] text-brand-deep sm:text-[18px]">
             <svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true">
               <rect width="34" height="34" rx="10" fill="#0f766e" />
@@ -44,24 +44,23 @@ export default function TravelerLayout({ children }: { children: ReactNode }) {
             </svg>
             Dream Destination
           </Link>
-          <nav aria-label="Primary" className="hidden items-center gap-1 md:flex">
+          <nav aria-label="Primary" className="hidden items-center md:flex lg:gap-1">
             {DESKTOP_LINKS.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
                 data-touch-target
-                className="inline-flex items-center rounded-full px-4 text-[15px] font-[650] text-text-primary hover:bg-surface-subtle"
+                className="inline-flex items-center whitespace-nowrap rounded-full px-3 text-[15px] font-[650] text-text-primary hover:bg-surface-subtle lg:px-4"
               >
                 {item.label}
               </Link>
             ))}
           </nav>
           <span className="whitespace-nowrap rounded-full border border-border-subtle bg-white px-3 py-1 text-[13px] font-[650] text-text-secondary">
-            <span className="sm:hidden">Demo data</span>
-            <span className="hidden sm:inline">Demonstration data</span>
+            <span className="lg:hidden">Demo data</span>
+            <span className="hidden lg:inline">Demonstration data</span>
           </span>
-        </div>
-      </header>
+      </ScrollHeader>
 
       <main id="main" className="page-gutter py-5">
         {children}

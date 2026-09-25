@@ -11,6 +11,13 @@ import { Conversation } from './Conversation';
  * preserved rather than retyped.
  */
 
+const PHOTOS: Record<string, string> = {
+  'ooty-nilgiris': '/images/ooty-nilgiris.jpg',
+  'coonoor-valley': '/images/coonoor-valley.jpg',
+  'valparai-anamalai': '/images/valparai-anamalai.jpg',
+  'coimbatore-city': '/images/coimbatore-city.jpg',
+};
+
 export const dynamic = 'force-dynamic';
 
 export default async function DreamAiPage({
@@ -56,12 +63,22 @@ export default async function DreamAiPage({
                 <li key={destination.id}>
                   <Link
                     href={`/destinations/${destination.slug}`}
-                    className="group relative block h-40 overflow-hidden rounded-[18px]"
+                    className="group relative block h-44 overflow-hidden rounded-[18px]"
                   >
-                    <Landscape
-                      scene={sceneForThemes(destination.themes)}
-                      className="h-full w-full transition-transform duration-500 group-hover:scale-105"
-                    />
+                    {PHOTOS[destination.slug] === undefined ? (
+                      <Landscape
+                        scene={sceneForThemes(destination.themes)}
+                        className="h-full w-full transition-transform duration-500 group-hover:scale-105"
+                      />
+                    ) : (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={PHOTOS[destination.slug]}
+                        alt=""
+                        loading="lazy"
+                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                    )}
                     <span className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#0f2a40] to-transparent" />
                     <span className="absolute inset-x-3 bottom-3 flex items-end justify-between gap-2 text-white">
                       <span>

@@ -122,6 +122,30 @@ export function Rail({ columns, children }: { columns: string; children: ReactNo
   );
 }
 
+/** Photographs in public/images, keyed by destination or place slug. */
+const PHOTOS: Record<string, string> = {
+  'ooty-nilgiris': '/images/ooty-nilgiris.jpg',
+  'coonoor-valley': '/images/coonoor-valley.jpg',
+  'valparai-anamalai': '/images/valparai-anamalai.jpg',
+  'coimbatore-city': '/images/coimbatore-city.jpg',
+  'avalanche-lake': '/images/avalanche-lake.jpg',
+  'emerald-lake-village': '/images/emerald-lake-village.jpg',
+  'grass-hills-viewpoint': '/images/grass-hills-viewpoint.jpg',
+  'droog-fort-trail': '/images/droog-fort-trail.jpg',
+  'hidden-valley-tea-walk': '/images/hidden-valley-tea-walk.jpg',
+  'chinnakallar-falls': '/images/chinnakallar-falls.jpg',
+};
+
+const ZOOM = 'h-full w-full object-cover transition-transform duration-500 group-hover:scale-105';
+
+/** The card image: a photograph when one exists for the slug, else the illustrated scene. */
+function CardImage({ href, scene }: { href: string; scene: Scene }) {
+  const src = PHOTOS[href.split('/').pop() ?? ''];
+  if (src === undefined) return <Landscape scene={scene} className={ZOOM} />;
+  // eslint-disable-next-line @next/next/no-img-element
+  return <img src={src} alt="" loading="lazy" className={ZOOM} />;
+}
+
 const CARD =
   'group overflow-hidden rounded-[24px] border border-border-subtle bg-surface-base shadow-sm transition-shadow hover:shadow-lg motion-safe:transition-transform motion-safe:hover:-translate-y-0.5';
 
@@ -170,7 +194,7 @@ export function DestinationCard({
   return (
     <Link href={href} className={clsx(CARD, 'flex h-full flex-col')}>
       <div className="relative h-56 overflow-hidden">
-        <Landscape scene={scene} className="h-full w-full transition-transform duration-500 group-hover:scale-105" />
+        <CardImage href={href} scene={scene} />
         <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-[#0f2a40] via-[#0f2a40]/70 to-transparent" />
         <span className="absolute left-3 top-3 rounded-full bg-white px-3 py-1 text-[13px] font-[750] text-brand-deep shadow-sm">
           {cost}
@@ -209,7 +233,7 @@ export function WideCard({
   return (
     <Link href={href} className={clsx(CARD, 'flex h-full flex-col sm:flex-row')}>
       <div className="h-28 shrink-0 overflow-hidden sm:h-auto sm:w-44">
-        <Landscape scene={scene} className="h-full w-full transition-transform duration-500 group-hover:scale-105" />
+        <CardImage href={href} scene={scene} />
       </div>
       <div className="min-w-0 flex-1 p-4">
         <div className="flex flex-wrap items-start justify-between gap-2">
@@ -246,7 +270,7 @@ export function GemCard({
   return (
     <Link href={href} className={clsx(CARD, 'flex h-full flex-col')}>
       <div className="h-28 overflow-hidden">
-        <Landscape scene={scene} className="h-full w-full transition-transform duration-500 group-hover:scale-105" />
+        <CardImage href={href} scene={scene} />
       </div>
       <div className="flex flex-1 flex-col p-4">
         <p className="text-[16px] font-[700] leading-snug text-text-primary">{name}</p>

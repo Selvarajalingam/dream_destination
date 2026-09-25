@@ -129,7 +129,7 @@ export function TripSummaryPanel({
 
   return (
     <section aria-label="Trip summary">
-      <h2 className="font-display text-[26px] font-[700] leading-tight text-brand-deep">Your trip</h2>
+      <h2 className="text-[24px] font-[800] leading-tight text-brand-deep">Your trip</h2>
       <p className="mt-1 text-[14px] text-text-secondary">
         {done} of {FIELDS.length} details complete
       </p>
@@ -162,7 +162,7 @@ export function TripSummaryPanel({
                 data-testid={`brief-${field}`}
                 onClick={() => setEditing(field)}
                 className={clsx(
-                  'flex min-h-[48px] w-full items-center gap-3 rounded-lg px-1 text-left',
+                  'flex min-h-[44px] w-full items-center gap-3 rounded-lg px-1 text-left',
                   isHighlighted && 'bg-brand-saffron/10',
                 )}
               >
@@ -171,10 +171,10 @@ export function TripSummaryPanel({
                 <dd
                   className={clsx(
                     'min-w-0 flex-1 truncate text-[14px]',
-                    value === null ? 'font-[650] text-brand-primary' : 'font-[600] text-text-primary',
+                    value === null ? 'font-normal text-text-secondary' : 'font-[600] text-text-primary',
                   )}
                 >
-                  {value ?? 'Not set'}
+                  {value ?? 'Add'}
                 </dd>
                 {value !== null && (
                   <span
