@@ -2,6 +2,7 @@
 
 import clsx from 'clsx';
 import { useState } from 'react';
+import { Icon } from '@/components/landing/kit';
 import { Button } from '@/components/ui/primitives';
 import { formatInr, rupeesToMinor } from '@/shared/money';
 
@@ -51,6 +52,24 @@ const LABELS: Record<(typeof FIELDS)[number], string> = {
   transport: 'Transport',
   constraints: 'Access needs',
 };
+
+const FIELD_ICONS: Record<(typeof FIELDS)[number], string> = {
+  origin: 'M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.800 12 21 12 21ZM12 12a2.500 2.500 0 1 0 0-5 2.500 2.500 0 0 0 0 5Z',
+  dateFlexibility: 'M4 6h16v14H4zM4 10h16M8 3v4M16 3v4',
+  durationDays: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 7v5l3 2',
+  party: 'M9 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM3 20a6 6 0 0 1 12 0M16 5.500a3 3 0 0 1 0 5.500M18 14.500a6 6 0 0 1 3 5.500',
+  budget: 'M6 4h12M6 9h12M9 4c5 0 6 5 0 5l6 8',
+  interests: 'M12 20s-7-4.400-7-10a4 4 0 0 1 7-2.500A4 4 0 0 1 19 10c0 5.600-7 10-7 10Z',
+  pace: 'M4 17a8 8 0 1 1 16 0M12 17l4-5',
+  crowdTolerance: 'M9 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM3 20a6 6 0 0 1 12 0M16 5.500a3 3 0 0 1 0 5.500M18 14.500a6 6 0 0 1 3 5.500',
+  transport: 'M5 16V11l2-5h10l2 5v5M3 16h18M7.500 19v-3M16.500 19v-3',
+  constraints: 'M12 5a1.500 1.500 0 1 0 0-3 1.500 1.500 0 0 0 0 3ZM12 6v6h5l2 6M9 13a5 5 0 1 0 6 7',
+};
+
+/** How many of the ten summary fields have a value. */
+export function completedCount(brief: TripBriefView): number {
+  return FIELDS.filter((field) => describe(field, brief) !== null).length;
+}
 
 function describe(field: (typeof FIELDS)[number], brief: TripBriefView): string | null {
   switch (field) {
@@ -106,39 +125,67 @@ export function TripSummaryPanel({
   onChange: (brief: TripBriefView) => void;
 }) {
   const [editing, setEditing] = useState<string | null>(null);
+  const done = completedCount(brief);
 
   return (
     <section aria-label="Trip summary">
-      <h2 className="text-[18px] font-[650]">Your trip so far</h2>
+      <h2 className="font-display text-[26px] font-[700] leading-tight text-brand-deep">Your trip</h2>
       <p className="mt-1 text-[14px] text-text-secondary">
-        Tap any value to change it. Nothing here is guessed from data you did not give us.
+        {done} of {FIELDS.length} details complete
+      </p>
+      <div
+        role="progressbar"
+        aria-label="Trip details complete"
+        aria-valuemin={0}
+        aria-valuemax={FIELDS.length}
+        aria-valuenow={done}
+        className="mt-2 h-2 overflow-hidden rounded-full bg-surface-subtle"
+      >
+        <div
+          className="h-full rounded-full bg-brand-primary transition-[width] duration-500"
+          style={{ width: `${(done / FIELDS.length) * 100}%` }}
+        />
+      </div>
+      <p className="mt-3 text-[13px] text-text-secondary">
+        Tap any row to change it. Nothing here is guessed from data you did not give us.
       </p>
 
-      <dl className="mt-3 space-y-1">
+      <dl className="mt-2">
         {FIELDS.map((field) => {
           const value = describe(field, brief);
           const isHighlighted = highlighted.includes(field);
 
           return (
-            <div
-              key={field}
-              className="flex items-center justify-between gap-3 border-t border-border-subtle py-1"
-            >
-              <dt className="text-[14px] text-text-secondary">{LABELS[field]}</dt>
-              <dd>
-                <button
-                  type="button"
-                  data-testid={`brief-${field}`}
-                  onClick={() => setEditing(field)}
+            <div key={field} className="border-t border-border-subtle first:border-t-0">
+              <button
+                type="button"
+                data-testid={`brief-${field}`}
+                onClick={() => setEditing(field)}
+                className={clsx(
+                  'flex min-h-[48px] w-full items-center gap-3 rounded-lg px-1 text-left',
+                  isHighlighted && 'bg-brand-saffron/10',
+                )}
+              >
+                <Icon d={FIELD_ICONS[field]} size={18} className="text-text-secondary" />
+                <dt className="w-[92px] shrink-0 text-[14px] text-text-secondary">{LABELS[field]}</dt>
+                <dd
                   className={clsx(
-                    'min-h-[44px] rounded-lg px-2 text-right text-[14px] font-[650]',
-                    value === null && 'text-text-secondary font-normal',
-                    isHighlighted && 'bg-brand-saffron/15 ring-1 ring-brand-saffron/40',
+                    'min-w-0 flex-1 truncate text-[14px]',
+                    value === null ? 'font-[650] text-brand-primary' : 'font-[600] text-text-primary',
                   )}
                 >
                   {value ?? 'Not set'}
-                </button>
-              </dd>
+                </dd>
+                {value !== null && (
+                  <span
+                    aria-hidden="true"
+                    className="inline-flex size-5 shrink-0 items-center justify-center rounded-full bg-status-good text-white"
+                  >
+                    <Icon d="M5 12.500l4.500 4.500L19 7.500" size={12} />
+                  </span>
+                )}
+                <Icon d="M4 20h4L19 9l-4-4L4 16v4ZM13.500 6.500l4 4" size={16} className="text-text-secondary" />
+              </button>
             </div>
           );
         })}
